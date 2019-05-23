@@ -1,0 +1,72 @@
+.chatWindow{
+  width: 700px;
+  height: 600px;
+  position: fixed;
+  top: 50px;
+  left: 300px;
+  background: #DEE5EE;
+  .chatWindow-header{
+    width: 100%;
+    height: 40px;
+    background: #EBF1F6;
+    text-align: left;
+    overflow: hidden;
+    .chatWindow-header-name{
+      display: inline-block;
+      vertical-align: top;
+      height: 100%;
+      line-height: 40px;
+      padding-left: 10px;
+      padding-right: 10px;
+      color:#707E87;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    .chatWindow-header-close{
+      display: inline-block;
+      vertical-align: top;
+      width: 40px;
+      height: 100%;
+      float: right;
+      line-height: 40px;
+      padding-right: 15px;
+      cursor: pointer;
+      text-align: center;
+      &:hover{
+        font-size: 16px;
+      }
+    }
+  }
+  .chatWindow-body{
+    width: 100%;
+    height: 560px;
+    .chatWindow-body-chat{
+      width: 670px;
+      height: 400px;
+      margin: 0 auto;
+      margin-top: 10px;
+      background: #ffffff;
+    }
+    .chatWindow-body-toolbar{
+      width: 670px;
+      height: 30px;
+      margin: 0 auto;
+      background: #EBF1F6;
+    }
+    .chatWindow-body-reply{
+      width: 670px;
+      height: 80px;
+      margin: 0 auto;
+      background: #fff;
+      text-align: left;
+      padding: 10px;
+      overflow: auto;
+    }
+    .chatWindow-body-btnBox{
+      width: 670px;
+      margin: 5px auto;
+      height: 30px;
+      text-align: right;
+    }
+  }
+}
