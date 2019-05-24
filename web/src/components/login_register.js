@@ -18,12 +18,8 @@ class Register extends Component{
                 form.password = values.password
                 $axios.post('/api/user/register', form).then((res) => {
                     if (res.status === 200) {
-                        if (res.data.status === 200) {
-                            message.success('账号注册成功')
-                            this.props.history.push('/login')
-                        } else {
-                            message.error('账号已经被注册')
-                        }
+                        message.success('账号注册成功')
+                        this.props.history.push('/login')
                     }
                 })
             } else {

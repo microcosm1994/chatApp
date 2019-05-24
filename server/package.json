@@ -10,8 +10,10 @@
     "egg": "^2.15.1",
     "egg-cors": "^2.2.0",
     "egg-mysql": "^3.0.0",
+    "egg-redis": "^2.3.2",
     "egg-scripts": "^2.11.0",
     "egg-sequelize": "^5.0.0",
+    "jsonwebtoken": "^8.5.1",
     "mysql2": "^1.6.5",
     "sequelize": "^5.8.6"
   },

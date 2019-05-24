@@ -1,7 +1,9 @@
 import React, { Component } from 'react'
-import {Layout, Menu, Icon } from 'antd'
+import {Layout, Menu, Icon, Avatar, Dropdown } from 'antd'
 import { Switch } from 'react-router-dom'
 import { renderRoutes } from 'react-router-config'
+import cookie from 'react-cookies'
+import {$axios} from "../lib/interceptors";
 import Userlist from './userList'
 import ChatWindow from './chatWindow'
 import '../css/home.css'
@@ -12,21 +14,59 @@ const MenuItemGroup = Menu.ItemGroup;
 class Home extends Component{
     constructor (props) {
         super(props)
-        console.log(props);
         this.state = {
-            route: props.route.routes
+            route: props.route.routes,
+            user: {
+                nickname: cookie.load('nickname'),
+                uid: cookie.load('uid'),
+                token: cookie.load('t')
+            }
         }
     }
     handleClick = e => {
         let path = e.item.props.path
-        console.log(path);
         this.props.history.push(path)
     }
+    headerClick = e => {
+        let pathArr = ['/login']
+        let index = e.key - 0
+        switch (index) {
+            case 0:
+                $axios.post('/api/user/logout').then((res) => {
+                    if (res.status === 200) {
+                        cookie.remove('nickname')
+                        this.props.history.push(pathArr[index])
+                    }
+                })
+                break
+        }
+    }
     render () {
+        // 下拉菜单
+        const hearderMenu = (
+            <Menu onClick={this.headerClick}>
+                <Menu.Item key="0">
+                    退 出
+                </Menu.Item>
+            </Menu>
+        );
         return(
             <Layout className='home'>
                 {/*头部*/}
-                <Header className='home-header'></Header>
+                <Header className='home-header'>
+                    <div className='home-header-user'>
+                        <div className='home-header-user-avator'>
+                            <Avatar shape='square' size={30}  src='../img/avator.jpg' />
+                        </div>
+                        <div className='home-header-user-menu'>
+                            <Dropdown overlay={hearderMenu} trigger={['click']}>
+                                <a className="ant-dropdown-link" href="#">
+                                    {this.state.user.nickname}<Icon type="down" />
+                                </a>
+                            </Dropdown>,
+                        </div>
+                    </div>
+                </Header>
                 <Layout className='home-body'>
                     {/*侧边栏*/}
                     <Sider className='home-body-sidebar'>

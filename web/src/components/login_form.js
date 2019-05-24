@@ -1,6 +1,7 @@
 import React, {Component} from 'react'
 import {Form, Icon, Input, Button, Checkbox} from 'antd'
 import {$axios} from "../lib/interceptors";
+import cookie from 'react-cookies'
 import '../css/login.css'
 
 class Login extends Component{
@@ -17,7 +18,9 @@ class Login extends Component{
                 form.password = values.password
                 $axios.post('/api/user/login', form).then((res) => {
                     if (res.status === 200) {
-                        this.props.history.push('/login')
+                        // 保存用户信息到cookie
+                        cookie.save('nickname', res.data.nickname)
+                        this.props.history.push('/home')
                     }
                 })
             } else {

@@ -24,7 +24,7 @@ export default {
             ]
         },
         {
-            path: '/',
+            path: '/home',
             component: home,
             routes: [
                 {

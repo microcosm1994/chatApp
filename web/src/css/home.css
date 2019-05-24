@@ -4,6 +4,21 @@
 }
 .home .ant-layout-header {
   padding: 0;
+  overflow: hidden;
+}
+.home .ant-layout-header .home-header-user {
+  float: right;
+  margin-right: 30px;
+  height: 100%;
+}
+.home .ant-layout-header .home-header-user .home-header-user-avator {
+  display: inline-block;
+  vertical-align: top;
+}
+.home .ant-layout-header .home-header-user .home-header-user-menu {
+  display: inline-block;
+  vertical-align: top;
+  margin-left: 15px;
 }
 .home .ant-layout-sider {
   height: 100%;

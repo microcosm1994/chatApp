@@ -6,6 +6,7 @@ class user extends Service {
         let getUser = {
             username: obj.username
         }
+        obj.password = await ctx.service.utils.sha256(obj.password, obj.username)
         const user = await ctx.model.User.findOrCreate({
             where: getUser,
             defaults: obj

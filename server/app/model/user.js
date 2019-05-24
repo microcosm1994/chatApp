@@ -8,13 +8,29 @@ module.exports = app => {
             autoIncrement: true
         },
         nickname: STRING(30),
-        username: STRING,
+        username: {
+            type: STRING,
+            unique: true
+        },
         password: STRING,
         admin: INTEGER,
-        createtime: DATE,
-        updatetime: DATE
+        createtime: {
+            type: DATE,
+            defaultValue: DATE.NOW
+        },
+        updatetime: {
+            type: DATE,
+            defaultValue: DATE.NOW
+        }
     },{
         timestamps: false,
+        // 默认作用域
+        defaultScope: {
+            attributes: {
+                // 排除密码，不返回密码
+                exclude: ['password']
+            }
+        }
     });
 
     return User;

@@ -15,8 +15,12 @@ module.exports = appInfo => {
     // use for cookie sign key, should change to your own and keep security
     config.keys = appInfo.name + '_1558251025314_7295';
 
-    // add your middleware config here
-    config.middleware = [];
+    // 中间件
+    config.middleware = ['user'];
+    // 中间件配置
+    config.user = {
+        whiteList: ['/user/login', '/user/register']
+    }
     // mysql数据库
     config.sequelize  = {
         dialect: 'mysql',
@@ -36,7 +40,16 @@ module.exports = appInfo => {
     };
     config.cors = {
         allowMethods: 'GET,HEAD,PUT,POST,DELETE,PATCH,OPTIONS',
-    };
+    }
+    // redis
+    config.redis = {
+        client: {
+            port: 6379,          // Redis port
+            host: '127.0.0.1',   // Redis host
+            password: 'auth',
+            db: 0,
+        }
+    }
     // add your user config here
     const userConfig = {
         // myAppName: 'egg',
