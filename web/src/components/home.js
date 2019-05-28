@@ -4,7 +4,7 @@ import { Switch } from 'react-router-dom'
 import { renderRoutes } from 'react-router-config'
 import cookie from 'react-cookies'
 import {$axios} from "../lib/interceptors";
-import Userlist from './userList'
+import Friends from './friends'
 import '../css/home.css'
 
 const { Header, Sider, Content } = Layout
@@ -134,7 +134,7 @@ class Home extends Component{
                         </Switch>
                     </Content>
                 </Layout>
-                <Userlist></Userlist>
+                <Friends uid={this.state.user.uid}></Friends>
             </Layout>
         )
     }

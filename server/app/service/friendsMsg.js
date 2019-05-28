@@ -1,6 +1,6 @@
 const Service = require('egg').Service;
 
-class userList extends Service{
+class friendsMsg extends Service{
     // 创建
     async create(obj) {
         const ctx = this.ctx;
@@ -8,7 +8,7 @@ class userList extends Service{
             parentId: obj.parentId
         }
         obj.password = await ctx.service.utils.sha256(obj.password, obj.username)
-        const data = await ctx.model.User.findOrCreate({
+        const data = await ctx.model.FriendsMsg.findOrCreate({
             where: query,
             defaults: obj
         })
@@ -17,8 +17,8 @@ class userList extends Service{
     // 查找
     async find (obj) {
         const ctx = this.ctx;
-        const data = await ctx.model.UserList.findAll({where: obj})
+        const data = await ctx.model.FriendsMsg.findAll({where: obj})
         return data
     }
 }
-module.exports = userList
+module.exports = friendsMsg

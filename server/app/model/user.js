@@ -14,7 +14,10 @@ module.exports = app => {
         },
         password: STRING,
         admin: INTEGER,
-        deleete: INTEGER,
+        delete: {
+            type: INTEGER,
+            defaultValue: 0
+        },
         createtime: {
             type: DATE,
             defaultValue: DATE.NOW

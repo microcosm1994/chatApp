@@ -5,6 +5,8 @@
 .home .ant-layout-header {
   padding: 0;
   overflow: hidden;
+  position: relative;
+  z-index: 999;
 }
 .home .ant-layout-header .home-header-user {
   float: right;

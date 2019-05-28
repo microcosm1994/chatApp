@@ -1,14 +1,13 @@
-
 module.exports = app => {
     const {STRING, DATE, UUID, INTEGER} = app.Sequelize
 
-    const UserList = app.model.define('userList', {
+    const FriendsMsg = app.model.define('friendsMsg', {
         id: {
             type: UUID,
             primaryKey: true,
             autoIncrement: true
         },
-        parentId: INTEGER,
+        userId: INTEGER,
         target: STRING,
         type: {
             type: INTEGER,
@@ -29,8 +28,8 @@ module.exports = app => {
     }, {
         timestamps: false
     })
-    UserList.associate = function() {
-        app.model.UserList.belongsTo(app.model.User, { foreignKey: 'parenrId', targetKey: 'id' })
+    FriendsMsg.associate = function() {
+        app.model.FriendsMsg.belongsTo(app.model.User, { foreignKey: 'userId', targetKey: 'id' })
     }
-    return UserList
+    return FriendsMsg
 }
