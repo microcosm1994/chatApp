@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Switch, Router, Route } from 'react-router-dom'
+import { BrowserRouter, Switch } from 'react-router-dom'
 import { renderRoutes } from 'react-router-config'
 import { LocaleProvider } from 'antd'
 import routes from './router/index'
@@ -11,7 +11,7 @@ import 'antd/dist/antd.css'
 
 moment.locale('zh-cn')
 function App() {
-  return (
+    return (
       <div className="App">
           <LocaleProvider locale={zhCN}>
               <BrowserRouter>
@@ -21,7 +21,7 @@ function App() {
               </BrowserRouter>
           </LocaleProvider>
       </div>
-  );
+  )
 }
 
 export default App;

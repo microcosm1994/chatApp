@@ -1,8 +1,7 @@
 import React, {Component} from 'react'
-import {Button, Input, Icon } from 'antd'
+import {Button, Icon } from 'antd'
 import '../css/chatWindow.css'
 
-const { TextArea } = Input;
 export default class chatWindow extends Component{
     constructor (props) {
         super(props)

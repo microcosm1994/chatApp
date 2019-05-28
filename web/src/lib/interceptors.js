@@ -40,6 +40,8 @@ $axios.interceptors.response.use(
                 case 403:
                     message.error(m)
                     break
+                default:
+                    break
             }
         }
         return Promise.reject(err)

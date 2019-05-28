@@ -9,12 +9,20 @@ export default class userList extends Component{
         this.state = {}
     }
     tabHandler (key) {
-        console.log(key);
+        console.log(key)
+    }
+    smallFullscreen () {
+        this.refs.userListSmallWindow.style.display = 'none'
+        this.refs.userListBigWindow.style.display = 'block'
+    }
+    bigFullscreen () {
+        this.refs.userListBigWindow.style.display = 'none'
+        this.refs.userListSmallWindow.style.display = 'block'
     }
     render () {
         return (
             <div className='userList'>
-                <div className='userList-smallWindow'>
+                <div className='userList-smallWindow' ref='userListSmallWindow'>
                     <div className='userList-smallWindow-info'>
                         <div className='userList-smallWindow-info-avator'>
                             <Avatar size="small" src='../img/avator.jpg' />
@@ -23,14 +31,14 @@ export default class userList extends Component{
                             小宇宙
                         </div>
                     </div>
-                    <div className='userList-smallWindow-fullscreen'>
+                    <div className='userList-smallWindow-fullscreen' onClick={this.smallFullscreen.bind(this)}>
                         <Icon type="fullscreen" />
                     </div>
                 </div>
-                <div className='userList-bigWindow'>
+                <div className='userList-bigWindow' ref='userListBigWindow'>
                     <div className='userList-bigWindow-info'>
                         <div className='userList-bigWindow-info-menu'>
-                            <div className='userList-bigWindow-info-menu-fullscreen'>
+                            <div className='userList-bigWindow-info-menu-fullscreen' onClick={this.bigFullscreen.bind(this)}>
                                 <Icon type="fullscreen-exit" />
                             </div>
                         </div>

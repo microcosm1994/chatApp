@@ -24,15 +24,17 @@ export default {
             ]
         },
         {
-            path: '/home',
+            path: '/',
             component: home,
             routes: [
                 {
-                    path: '/home/message',
+                    path: '/message',
+                    exact: true,
                     component: message,
                 },
                 {
-                    path: '/home/chatWindow',
+                    path: '/chatWindow',
+                    exact: true,
                     component: chatWindow,
                 }
             ]

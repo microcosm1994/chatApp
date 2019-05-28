@@ -1,9 +1,9 @@
 module.exports = app => {
-    const { STRING, INTEGER, DATE } = app.Sequelize;
+    const { STRING, INTEGER, DATE, UUID } = app.Sequelize;
 
     const User = app.model.define('users', {
         id: {
-            type: INTEGER,
+            type: UUID,
             primaryKey: true,
             autoIncrement: true
         },
@@ -14,6 +14,7 @@ module.exports = app => {
         },
         password: STRING,
         admin: INTEGER,
+        deleete: INTEGER,
         createtime: {
             type: DATE,
             defaultValue: DATE.NOW
@@ -32,6 +33,5 @@ module.exports = app => {
             }
         }
     });
-
     return User;
 };

@@ -20,7 +20,7 @@ class Login extends Component{
                     if (res.status === 200) {
                         // 保存用户信息到cookie
                         cookie.save('nickname', res.data.nickname)
-                        this.props.history.push('/home')
+                        this.props.history.push('/')
                     }
                 })
             } else {

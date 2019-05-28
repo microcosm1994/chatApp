@@ -5,7 +5,6 @@ import { renderRoutes } from 'react-router-config'
 import cookie from 'react-cookies'
 import {$axios} from "../lib/interceptors";
 import Userlist from './userList'
-import ChatWindow from './chatWindow'
 import '../css/home.css'
 
 const { Header, Sider, Content } = Layout
@@ -39,6 +38,8 @@ class Home extends Component{
                     }
                 })
                 break
+            default:
+                break
         }
     }
     render () {
@@ -60,7 +61,7 @@ class Home extends Component{
                         </div>
                         <div className='home-header-user-menu'>
                             <Dropdown overlay={hearderMenu} trigger={['click']}>
-                                <a className="ant-dropdown-link" href="#">
+                                <a className="ant-dropdown-link" href="#javascript:;">
                                     {this.state.user.nickname}<Icon type="down" />
                                 </a>
                             </Dropdown>,
@@ -134,7 +135,6 @@ class Home extends Component{
                     </Content>
                 </Layout>
                 <Userlist></Userlist>
-                <ChatWindow></ChatWindow>
             </Layout>
         )
     }
