@@ -1,7 +1,6 @@
-'use strict';
 const Controller = require('egg').Controller;
 
-class friendsMsg extends Controller{
+class FriendsMsg extends Controller{
     // 添加
     async add () {
         let {ctx} = this
@@ -35,4 +34,4 @@ class friendsMsg extends Controller{
         })
     }
 }
-module.exports = friendsMsg
+module.exports = FriendsMsg

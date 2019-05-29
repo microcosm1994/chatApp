@@ -1,24 +1,61 @@
 import React, {Component} from 'react'
-import {Icon, Avatar, Tabs } from 'antd'
+import {Icon, Avatar, Tabs, Input, List } from 'antd'
 import {$axios} from "../lib/interceptors";
-import cookie from 'react-cookies'
 import '../css/friends.css'
 
 const TabPane = Tabs.TabPane;
+const Search = Input.Search;
 export default class friends extends Component{
     constructor (props) {
         super(props)
         this.state = {
-            uid: props.uid
+            uid: props.uid,
+            friendsList: [],
+            searchFriendsList: []
         }
+    }
+    componentDidMount () {
+        this.getFriends()
     }
     // 切换tab栏
     tabHandler (key) {
-        console.log(key)
+        if (key - 0 === 1) {
+            this.getFriends()
+        }
+        if (key - 0 === 2) {
+            console.log('群组');
+        }
+    }
+    // 获取好友列表
+    getFriends () {
+        let form = {
+            userId: this.state.uid
+        }
+        $axios.post('/api/friends/get', form).then((res) => {
+            if (res.status === 200) {
+                this.setState({friendsList: res.data})
+            }
+        })
     }
     // 添加好友
-    addFriends () {
-        console.log(this.state);
+    addFriends (value) {
+        let form = {
+            username: value,
+            nickname: value,
+        }
+        $axios.post('/api/user/get', form).then((res) => {
+            if (res.status === 200) {
+                this.setState({searchFriendsList: res.data})
+            }
+        })
+    }
+    // 显示模态框
+    modalShow () {
+        this.refs.friendsModal.style.display = 'block'
+    }
+    // 隐藏模态框
+    modalHide () {
+        this.refs.friendsModal.style.display = 'none'
     }
     // 放大窗口
     smallFullscreen () {
@@ -63,22 +100,59 @@ export default class friends extends Component{
                         </div>
                     </div>
                     <div className='friends-bigWindow-container'>
-                        <Tabs defaultActiveKey="1" onChange={this.tabHandler}>
+                        <Tabs defaultActiveKey="1" onChange={this.tabHandler.bind(this)}>
                             <TabPane tab="用户" key="1">
-                                Content of Tab Pane 1
+                                <List
+                                    itemLayout="horizontal"
+                                    dataSource={this.state.friendsList}
+                                    renderItem={item => (
+                                        <List.Item>
+                                            <List.Item.Meta
+                                                avatar={<Avatar src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" />}
+                                                title={<a href="https://ant.design">{item.title}</a>}
+                                                description="Ant Design, a design language for background applications, is refined by Ant UED Team"
+                                            />
+                                        </List.Item>
+                                    )}
+                                />
                             </TabPane>
                             <TabPane tab="聊天组" key="2">
                                 Content of Tab Pane 2
                             </TabPane>
                         </Tabs>
                     </div>
+                    <div className='friends-bigWindow-modal' ref='friendsModal'>
+                        <div className='friends-bigWindow-modal-menu'>
+                            <div className='friends-bigWindow-modal-menubtn' onClick={this.modalHide.bind(this)}>
+                                <Icon type="minus" />
+                            </div>
+                        </div>
+                        <div className='friends-bigWindow-modal-search'>
+                            <Search size='small' placeholder="输入账号或用户昵称" onSearch={this.addFriends.bind(this)} enterButton />
+                        </div>
+                        <div className='friends-bigWindow-modal-container'>
+                            <List
+                                itemLayout="horizontal"
+                                dataSource={this.state.searchFriendsList}
+                                renderItem={item => (
+                                    <List.Item>
+                                        <List.Item.Meta
+                                            avatar={<Avatar src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" />}
+                                            title={<a href="https://ant.design">{item.nickname}</a>}
+                                            description="sssss"
+                                        />
+                                    </List.Item>
+                                )}
+                            />
+                        </div>
+                    </div>
                     <div className='friends-bigWindow-tool'>
                         {/*{添加按钮}*/}
-                        <div className='friends-bigWindow-tool-menu' onClick={this.addFriends.bind(this)}>
+                        <div className='friends-bigWindow-tool-menu' onClick={this.modalShow.bind(this)}>
                             <Icon type="plus" />
                         </div>
                         {/*{搜索按钮}*/}
-                        <div className='friends-bigWindow-tool-menu'>
+                        <div className='friends-bigWindow-tool-menu' onClick={this.modalShow.bind(this)}>
                             <Icon type="search" />
                         </div>
                     </div>

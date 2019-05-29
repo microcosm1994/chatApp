@@ -1,9 +1,8 @@
-'use strict';
 const Controller = require('egg').Controller;
 
 class friends extends Controller{
-    // 添加
     async add () {
+        console.log(1);
         let {ctx} = this
         let form = ctx.request.body
         await ctx.service.friends.create(form).then((data) => {
@@ -18,7 +17,6 @@ class friends extends Controller{
             }
         })
     }
-    // 查找
     async get () {
         let {ctx} = this
         let form = ctx.request.body

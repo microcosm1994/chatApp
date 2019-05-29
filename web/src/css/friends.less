@@ -114,6 +114,51 @@
       padding-bottom: 40px;
       box-sizing: border-box;
     }
+    .friends-bigWindow-modal{
+      width: 100%;
+      height: 400px;
+      background: #7B7EAE;
+      position: absolute;
+      bottom: 40px;
+      left: 0;
+      text-align: left;
+      display: none;
+      .friends-bigWindow-modal-menu{
+        width: 100%;
+        height: 30px;
+        text-align: right;
+        .friends-bigWindow-modal-menubtn{
+          display: inline-block;
+          vertical-align: top;
+          width: 30px;
+          height: 30px;
+          line-height: 30px;
+          text-align: center;
+          cursor: pointer;
+          color: #fff;
+          &:hover{
+            font-size: 16px;
+          }
+        }
+      }
+      .friends-bigWindow-modal-search{
+        width: 100%;
+        padding: 7px;
+        height: 40px;
+        border-top: 1px solid #EEF2F7;
+        border-bottom: 1px solid #EEF2F7;
+        .ant-input{
+          font-size: 12px;
+        }
+        .ant-input-group-addon{
+          background: transparent;
+        }
+      }
+      .friends-bigWindow-modal-container{
+        width: 100%;
+
+      }
+    }
     .friends-bigWindow-tool{
       width: 100%;
       height: 40px;
@@ -122,6 +167,7 @@
       bottom: 0;
       left: 0;
       text-align: left;
+      border-top: 1px solid #EEF2F7;
       .friends-bigWindow-tool-menu{
         display: inline-block;
         vertical-align: top;

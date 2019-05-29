@@ -7,7 +7,7 @@ module.exports = app => {
             primaryKey: true,
             autoIncrement: true
         },
-        userId: INTEGER,
+        userid: INTEGER,
         target: STRING,
         type: {
             type: INTEGER,
@@ -29,7 +29,7 @@ module.exports = app => {
         timestamps: false
     })
     FriendsMsg.associate = function() {
-        app.model.FriendsMsg.belongsTo(app.model.User, { foreignKey: 'userId', targetKey: 'id' })
+        app.model.FriendsMsg.belongsTo(app.model.User, { foreignKey: 'userid', targetKey: 'id' })
     }
     return FriendsMsg
 }

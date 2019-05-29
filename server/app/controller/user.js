@@ -1,4 +1,3 @@
-'use strict';
 const Controller = require('egg').Controller;
 
 class User extends Controller {
@@ -25,7 +24,7 @@ class User extends Controller {
         // 加密密码
         password = await ctx.service.utils.sha256(password, username)
         // 查询用户
-        await ctx.service.user.find({username: username, password: password}).then(async (data) => {
+        await ctx.service.user.findOne({username: username, password: password}).then(async (data) => {
             if (data) {
                 // 生成token
                 let token = await ctx.service.verif.createToken({_id: data.id}, time)
@@ -63,6 +62,19 @@ class User extends Controller {
         await ctx.cookies.set('t', null)
         ctx.status = 200
         ctx.body = {}
+    }
+    async get () {
+        const {ctx} = this
+        let form = ctx.request.body
+        await ctx.service.user.findAll(form).then ((data) => {
+            if (data) {
+                ctx.status = 200
+                ctx.body = data
+            } else {
+                ctx.status = 400
+                ctx.body = {}
+            }
+        })
     }
 }
 

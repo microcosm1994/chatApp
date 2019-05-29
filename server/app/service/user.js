@@ -13,9 +13,22 @@ class user extends Service {
         })
         return user
     }
-    async find (obj) {
+    async findOne (obj) {
         const ctx = this.ctx;
         const user = await ctx.model.User.findOne({where: obj})
+        return user
+    }
+    async findAll (obj) {
+        const {app, ctx} = this;
+        const {Op} = app.Sequelize
+        const user = await ctx.model.User.findAll({
+            where: {
+                [Op.or]: [
+                    { username: {[Op.like]: '%' + obj.username + '%'}},
+                    { nickname: {[Op.like]: '%' + obj.nickname + '%'}}
+                ]
+            }
+        })
         return user
     }
 }
