@@ -21,12 +21,16 @@ class user extends Service {
     async findAll (obj) {
         const {app, ctx} = this;
         const {Op} = app.Sequelize
+        let uid = ctx.cookies.get('uid')
         const user = await ctx.model.User.findAll({
             where: {
                 [Op.or]: [
                     { username: {[Op.like]: '%' + obj.username + '%'}},
                     { nickname: {[Op.like]: '%' + obj.nickname + '%'}}
-                ]
+                ],
+                id: {
+                    [Op.not]: uid,
+                }
             }
         })
         return user

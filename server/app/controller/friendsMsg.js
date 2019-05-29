@@ -5,14 +5,14 @@ class FriendsMsg extends Controller{
     async add () {
         let {ctx} = this
         let form = ctx.request.body
-        await ctx.service.friends.create(form).then((data) => {
+        await ctx.service.friendsMsg.create(form).then((data) => {
             if (data[1]) {
                 ctx.status = 200
                 ctx.body = data
             } else {
                 ctx.status = 403
                 ctx.body = {
-                    error: '好友已存在'
+                    error: '好友请求已发送'
                 }
             }
         })

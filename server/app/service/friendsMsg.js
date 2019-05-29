@@ -4,12 +4,8 @@ class friendsMsg extends Service{
     // 创建
     async create(obj) {
         const ctx = this.ctx;
-        let query = {
-            parentId: obj.parentId
-        }
-        obj.password = await ctx.service.utils.sha256(obj.password, obj.username)
         const data = await ctx.model.FriendsMsg.findOrCreate({
-            where: query,
+            where: obj,
             defaults: obj
         })
         return data

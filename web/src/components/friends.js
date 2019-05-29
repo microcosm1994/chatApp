@@ -1,5 +1,5 @@
 import React, {Component} from 'react'
-import {Icon, Avatar, Tabs, Input, List } from 'antd'
+import {Icon, Avatar, Tabs, Input, List, message } from 'antd'
 import {$axios} from "../lib/interceptors";
 import '../css/friends.css'
 
@@ -37,17 +37,34 @@ export default class friends extends Component{
             }
         })
     }
-    // 添加好友
-    addFriends (value) {
-        let form = {
-            username: value,
-            nickname: value,
-        }
-        $axios.post('/api/user/get', form).then((res) => {
-            if (res.status === 200) {
-                this.setState({searchFriendsList: res.data})
+    // 搜索用户
+    searchFriends (value) {
+        if (value) {
+            let form = {
+                username: value,
+                nickname: value,
             }
-        })
+            $axios.post('/api/user/get', form).then((res) => {
+                if (res.status === 200) {
+                    this.setState({searchFriendsList: res.data})
+                }
+            })
+        }
+    }
+    // 发送添加好友请求
+    addFriends (id) {
+        if (id) {
+            let form = {
+                targetid: id,
+                userid: this.state.uid,
+                type: 1
+            }
+            $axios.post('/api/friendsMsg/add', form).then((res) => {
+                if (res.status === 200) {
+                    message.success('好友请求已发送')
+                }
+            })
+        }
     }
     // 显示模态框
     modalShow () {
@@ -128,16 +145,19 @@ export default class friends extends Component{
                             </div>
                         </div>
                         <div className='friends-bigWindow-modal-search'>
-                            <Search size='small' placeholder="输入账号或用户昵称" onSearch={this.addFriends.bind(this)} enterButton />
+                            <Search size='small' placeholder="输入账号或用户昵称" onSearch={this.searchFriends.bind(this)} enterButton />
                         </div>
                         <div className='friends-bigWindow-modal-container'>
                             <List
+                                size='small'
                                 itemLayout="horizontal"
                                 dataSource={this.state.searchFriendsList}
                                 renderItem={item => (
-                                    <List.Item>
+                                    <List.Item
+                                        actions={[<a onClick={this.addFriends.bind(this, item.id)} disabled={item.relation - 0 === 0} state={item.relation}>加好友</a>]}
+                                    >
                                         <List.Item.Meta
-                                            avatar={<Avatar src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" />}
+                                            avatar={<Avatar shape="square" src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" />}
                                             title={<a href="https://ant.design">{item.nickname}</a>}
                                             description="sssss"
                                         />

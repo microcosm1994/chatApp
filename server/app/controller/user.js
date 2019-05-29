@@ -66,10 +66,24 @@ class User extends Controller {
     async get () {
         const {ctx} = this
         let form = ctx.request.body
-        await ctx.service.user.findAll(form).then ((data) => {
+        let uid = ctx.cookies.get('uid')
+        await ctx.service.user.findAll(form).then (async (data) => {
             if (data) {
-                ctx.status = 200
-                ctx.body = data
+                let result = JSON.parse(JSON.stringify(data))
+                // 查找好友消息表中已发送的好友请求
+                await ctx.service.friendsMsg.find({userid: uid}).then((res) => {
+                    // 对比搜索的用户中有没有已经发送好友请求的用户
+                    for (let i = 0; i < res.length; i++) {
+                        for (let k = 0; k < data.length; k++) {
+                            if (res[i].targetid === data[k].id) {
+                                // 设置当前用户与目标用户关系为加好友但未通过：0：未通过；1：通过；
+                                result[k]['relation'] = 0
+                            }
+                        }
+                    }
+                    ctx.status = 200
+                    ctx.body = result
+                })
             } else {
                 ctx.status = 400
                 ctx.body = {}
