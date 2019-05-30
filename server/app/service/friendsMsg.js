@@ -11,9 +11,15 @@ class friendsMsg extends Service{
         return data
     }
     // 查找
-    async find (obj) {
+    async findAll (obj) {
         const ctx = this.ctx;
         const data = await ctx.model.FriendsMsg.findAll({where: obj})
+        return data
+    }
+    // 修改
+    async put (value, query) {
+        const ctx = this.ctx;
+        const data = await ctx.model.FriendsMsg.update(value, {where: query})
         return data
     }
 }

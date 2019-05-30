@@ -9,6 +9,14 @@ module.exports = app => {
         },
         userid: INTEGER,
         targetid: INTEGER,
+        opera: {
+            type: INTEGER,
+            defaultValue: 0
+        },
+        state: {
+            type: INTEGER,
+            defaultValue: 0
+        },
         type: {
             type: INTEGER,
             defaultValue: 1

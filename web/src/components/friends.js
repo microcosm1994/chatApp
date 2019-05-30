@@ -10,26 +10,34 @@ export default class friends extends Component{
         super(props)
         this.state = {
             uid: props.uid,
-            friendsList: [],
-            searchFriendsList: []
+            friendsList: [], // 好友列表
+            searchFriendsList: [], // 搜索好友列表
+            friendsMsgList: [], // 好友消息列表
+            notifyList: [], // 通知列表
         }
     }
     componentDidMount () {
         this.getFriends()
     }
-    // 切换tab栏
+    // 切换好友、聊天组tab栏
     tabHandler (key) {
-        if (key - 0 === 1) {
+        if (key === '1' || key === '1-1') {
             this.getFriends()
         }
-        if (key - 0 === 2) {
+        if (key === '1-2') {
             console.log('群组');
+        }
+        if (key === '2' || key === '2-1') {
+            this.getFriendsMsg()
+        }
+        if (key === '2-2') {
+            console.log('通知');
         }
     }
     // 获取好友列表
     getFriends () {
         let form = {
-            userId: this.state.uid
+            userid: this.state.uid
         }
         $axios.post('/api/friends/get', form).then((res) => {
             if (res.status === 200) {
@@ -66,6 +74,51 @@ export default class friends extends Component{
             })
         }
     }
+    // 获取好友消息列表
+    getFriendsMsg () {
+        let form = {
+            targetid: this.state.uid,
+            delete: 0
+        }
+        $axios.post('/api/friendsMsg/get', form).then((res) => {
+            if (res.status === 200) {
+                this.setState({friendsMsgList: res.data})
+            }
+        })
+    }
+    // 消息操作
+    msgOpera (id, opera) {
+        let form = {
+            where: {
+                id: id
+            },
+            update: {
+                opera: opera
+            },
+        }
+        $axios.post('/api/friendsMsg/put', form).then((res) => {
+            if (res.status === 200) {
+                console.log(res);
+            }
+        })
+    }
+    // 忽略消息
+    msgIgnore (id) {
+        let form = {
+            where: {
+                id: id
+            },
+            update: {
+                delete: 1
+            },
+        }
+        $axios.post('/api/friendsMsg/put', form).then((res) => {
+            if (res.status === 200) {
+                console.log(res);
+            }
+        })
+    }
+    // 标记已读
     // 显示模态框
     modalShow () {
         this.refs.friendsModal.style.display = 'block'
@@ -117,24 +170,52 @@ export default class friends extends Component{
                         </div>
                     </div>
                     <div className='friends-bigWindow-container'>
-                        <Tabs defaultActiveKey="1" onChange={this.tabHandler.bind(this)}>
-                            <TabPane tab="用户" key="1">
-                                <List
-                                    itemLayout="horizontal"
-                                    dataSource={this.state.friendsList}
-                                    renderItem={item => (
-                                        <List.Item>
-                                            <List.Item.Meta
-                                                avatar={<Avatar src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" />}
-                                                title={<a href="https://ant.design">{item.title}</a>}
-                                                description="Ant Design, a design language for background applications, is refined by Ant UED Team"
-                                            />
-                                        </List.Item>
-                                    )}
-                                />
+                        <Tabs defaultActiveKey="1" type="card" tabPosition='bottom' onChange={this.tabHandler.bind(this)}>
+                            <TabPane tab="聊天" key="1">
+                                <Tabs size='small' defaultActiveKey="1-1" onChange={this.tabHandler.bind(this)}>
+                                    <TabPane tab="好友" key="1-1">
+                                        <List
+                                            itemLayout="horizontal"
+                                            dataSource={this.state.friendsList}
+                                            renderItem={item => (
+                                                <List.Item>
+                                                    <List.Item.Meta
+                                                        avatar={<Avatar src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" />}
+                                                        title={<a href="https://ant.design">{item.title}</a>}
+                                                        description="Ant Design, a design language for background applications, is refined by Ant UED Team"
+                                                    />
+                                                </List.Item>
+                                            )}
+                                        />
+                                    </TabPane>
+                                    <TabPane tab="聊天组" key="1-2">
+                                        Content of Tab Pane 2
+                                    </TabPane>
+                                </Tabs>
                             </TabPane>
-                            <TabPane tab="聊天组" key="2">
-                                Content of Tab Pane 2
+                            <TabPane tab="消息" key="2">
+                                <Tabs size='small' defaultActiveKey="2-1"  onChange={this.tabHandler.bind(this)}>
+                                    <TabPane tab="好友消息" key="2-1">
+                                        <List
+                                            itemLayout="horizontal"
+                                            dataSource={this.state.friendsMsgList}
+                                            renderItem={item => (
+                                                <List.Item actions={[
+                                                    <ListBtn click={this.msgOpera.bind(this, item.id, 1)} text='同意' self={this} data={item} />,
+                                                    <ListBtn click={this.msgOpera.bind(this, item.id, 2)} text='拒绝' self={this} data={item} />,
+                                                    <ListBtn click={this.msgIgnore.bind(this, item.id)} text='忽略' self={this} data={item} />]}>
+                                                    <List.Item.Meta
+                                                        avatar={<Avatar src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" />}
+                                                        title={<a href="https://ant.design">{item.target.nickname}</a>}
+                                                    />
+                                                </List.Item>
+                                            )}
+                                        />
+                                    </TabPane>
+                                    <TabPane tab="通知" key="2-2">
+                                        Content of Tab Pane 2
+                                    </TabPane>
+                                </Tabs>
                             </TabPane>
                         </Tabs>
                     </div>
@@ -180,4 +261,7 @@ export default class friends extends Component{
             </div>
         )
     }
+}
+function ListBtn(props) {
+    return <a onClick={props.click} disabled={props.data.relation - 0 === 0} state={props.data.relation}>{props.text}</a>
 }

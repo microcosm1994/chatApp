@@ -71,7 +71,7 @@ class User extends Controller {
             if (data) {
                 let result = JSON.parse(JSON.stringify(data))
                 // 查找好友消息表中已发送的好友请求
-                await ctx.service.friendsMsg.find({userid: uid}).then((res) => {
+                await ctx.service.friendsMsg.findAll({userid: uid}).then((res) => {
                     // 对比搜索的用户中有没有已经发送好友请求的用户
                     for (let i = 0; i < res.length; i++) {
                         for (let k = 0; k < data.length; k++) {

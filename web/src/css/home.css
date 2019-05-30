@@ -24,6 +24,7 @@
 }
 .home .ant-layout-sider {
   height: 100%;
+  overflow: auto;
 }
 .home .home-header {
   width: 100%;

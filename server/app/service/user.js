@@ -35,6 +35,20 @@ class user extends Service {
         })
         return user
     }
+    async findidArr (arr) {
+        const {app, ctx} = this;
+        const {Op} = app.Sequelize
+        let uid = ctx.cookies.get('uid')
+        const user = await ctx.model.User.findAll({
+            where: {
+                id: {
+                    [Op.overlap]: arr,
+                    [Op.not]: uid,
+                }
+            }
+        })
+        return user
+    }
 }
 
 module.exports = user;
