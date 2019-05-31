@@ -1,7 +1,7 @@
 /* eslint valid-jsdoc: "off" */
+const path = require('path')
 
 'use strict';
-
 /**
  * @param {Egg.EggAppInfo} appInfo app info
  */
@@ -49,6 +49,11 @@ module.exports = appInfo => {
             password: 'auth',
             db: 0,
         }
+    }
+    // static
+    config.static = {
+        prefix: '/public/',
+        dir: path.join(appInfo.baseDir, '/app/public/')
     }
     // add your user config here
     const userConfig = {

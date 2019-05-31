@@ -60,7 +60,10 @@ class FriendsMsg extends Controller{
         let {ctx} = this
         let form = ctx.request.body
         await ctx.service.friendsMsg.put(form.update, form.where).then(data => {
-            console.log(data);
+            if (data[0]) {
+                let uid = ctx.cookies.get('uid')
+                let targetid = form.where.id
+            }
         })
     }
 }

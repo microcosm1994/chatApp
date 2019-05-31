@@ -8,7 +8,7 @@ module.exports = app => {
             autoIncrement: true
         },
         userid: INTEGER,
-        target: STRING,
+        targetid: INTEGER,
         type: {
             type: INTEGER,
             defaultValue: 1

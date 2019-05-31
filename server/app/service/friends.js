@@ -7,7 +7,6 @@ class friends extends Service{
         let query = {
             parentId: obj.parentId
         }
-        obj.password = await ctx.service.utils.sha256(obj.password, obj.username)
         const data = await ctx.model.Friends.findOrCreate({
             where: query,
             defaults: obj

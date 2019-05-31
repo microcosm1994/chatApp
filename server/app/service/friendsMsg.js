@@ -16,10 +16,20 @@ class friendsMsg extends Service{
         const data = await ctx.model.FriendsMsg.findAll({where: obj})
         return data
     }
+    // 按id查找
+    async findByPk (id) {
+        const ctx = this.ctx;
+        const data = await ctx.model.FriendsMsg.findByPk({param: id})
+        return data
+    }
     // 修改
     async put (value, query) {
         const ctx = this.ctx;
-        const data = await ctx.model.FriendsMsg.update(value, {where: query})
+        await ctx.model.FriendsMsg.update(value, {where: query}).then(async res => {
+            if (res[0]) {
+                let data = await this.findByPk(query.id)
+            }
+        })
         return data
     }
 }
