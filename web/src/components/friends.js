@@ -37,7 +37,7 @@ export default class friends extends Component{
     // 获取好友列表
     getFriends () {
         let form = {
-            userid: this.state.uid
+            uid: this.state.uid
         }
         $axios.post('/api/friends/get', form).then((res) => {
             if (res.status === 200) {
@@ -64,8 +64,7 @@ export default class friends extends Component{
         if (id) {
             let form = {
                 targetid: id,
-                userid: this.state.uid,
-                type: 1
+                userid: this.state.uid
             }
             $axios.post('/api/friendsMsg/add', form).then((res) => {
                 if (res.status === 200) {
@@ -78,6 +77,7 @@ export default class friends extends Component{
     getFriendsMsg () {
         let form = {
             targetid: this.state.uid,
+            opera: 0,
             delete: 0
         }
         $axios.post('/api/friendsMsg/get', form).then((res) => {
@@ -98,7 +98,7 @@ export default class friends extends Component{
         }
         $axios.post('/api/friendsMsg/put', form).then((res) => {
             if (res.status === 200) {
-                console.log(res);
+                this.getFriendsMsg()
             }
         })
     }
@@ -114,7 +114,7 @@ export default class friends extends Component{
         }
         $axios.post('/api/friendsMsg/put', form).then((res) => {
             if (res.status === 200) {
-                console.log(res);
+                this.getFriendsMsg()
             }
         })
     }
@@ -181,8 +181,8 @@ export default class friends extends Component{
                                                 <List.Item>
                                                     <List.Item.Meta
                                                         avatar={<Avatar src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" />}
-                                                        title={<a href="https://ant.design">{item.title}</a>}
-                                                        description="Ant Design, a design language for background applications, is refined by Ant UED Team"
+                                                        title={<a href="https://ant.design">{item.targetInfo.nickname}</a>}
+                                                        description=""
                                                     />
                                                 </List.Item>
                                             )}

@@ -9,10 +9,6 @@ module.exports = app => {
         },
         userid: INTEGER,
         targetid: INTEGER,
-        type: {
-            type: INTEGER,
-            defaultValue: 1
-        },
         delete: {
             type: INTEGER,
             defaultValue: 0

@@ -17,10 +17,6 @@ module.exports = app => {
             type: INTEGER,
             defaultValue: 0
         },
-        type: {
-            type: INTEGER,
-            defaultValue: 1
-        },
         delete: {
             type: INTEGER,
             defaultValue: 0

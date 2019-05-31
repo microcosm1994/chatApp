@@ -59,10 +59,25 @@ class FriendsMsg extends Controller{
     async put () {
         let {ctx} = this
         let form = ctx.request.body
-        await ctx.service.friendsMsg.put(form.update, form.where).then(data => {
+        let result = {}
+        await ctx.service.friendsMsg.put(form.update, form.where).then(async data => {
+            // 修改成功后再做对应的操作
             if (data[0]) {
-                let uid = ctx.cookies.get('uid')
-                let targetid = form.where.id
+                console.log(data);
+                let userid = data[1].userid
+                let targetid = data[1].targetid
+                let opera = data[1].opera
+                // 如果接受好友请求，就在好友表中添加一条数据
+                if (opera === 1) {
+                    await ctx.service.friends.create({userid: userid, targetid: targetid})
+                }
+                ctx.status = 200
+                ctx.body = result
+            } else {
+                ctx.status = 405
+                ctx.body = {
+                    error: '服务器错误'
+                }
             }
         })
     }

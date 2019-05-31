@@ -18,6 +18,7 @@ class user extends Service {
         const user = await ctx.model.User.findOne({where: obj})
         return user
     }
+    // 模糊查询
     async findAll (obj) {
         const {app, ctx} = this;
         const {Op} = app.Sequelize
@@ -35,6 +36,7 @@ class user extends Service {
         })
         return user
     }
+    // 按id数组查找
     async findidArr (arr) {
         const {app, ctx} = this;
         const {Op} = app.Sequelize
@@ -42,7 +44,7 @@ class user extends Service {
         const user = await ctx.model.User.findAll({
             where: {
                 id: {
-                    [Op.overlap]: arr,
+                    [Op.in]: arr,
                     [Op.not]: uid,
                 }
             }
