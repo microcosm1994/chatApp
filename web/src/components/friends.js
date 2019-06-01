@@ -78,7 +78,6 @@ export default class friends extends Component{
         let form = {
             targetid: this.state.uid,
             opera: 0,
-            delete: 0
         }
         $axios.post('/api/friendsMsg/get', form).then((res) => {
             if (res.status === 200) {

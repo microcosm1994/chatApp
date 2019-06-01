@@ -24,18 +24,23 @@ class FriendsMsg extends Controller{
         await ctx.service.friendsMsg.findAll(form).then(async (data) => {
             if (data) {
                 let idArr = []
+                // 深拷贝查询数据
                 let result = JSON.parse(JSON.stringify(data))
                 for (let i = 0; i < data.length; i++) {
+                    // 如果id数组中没有这个id就添加，如果有就不添加
                     if (!idArr.includes(data[i].userid)) {
                         idArr.push(data[i].userid)
                     }
                 }
+                // 如果id数组大于0，就按id查询用户数据
                 if (idArr.length > 0) {
                     await ctx.service.user.findidArr(idArr).then(res => {
                         if (res) {
+                            // 把查询到的用户数据添加到好友消息数据中
                             for (let i = 0; i < data.length; i++) {
                                 for (let k = 0; k < res.length; k++) {
                                     if (data[i].userid === res[k].id) {
+                                        // 删除用户id信息
                                         delete result[i].targetid
                                         delete result[i].userid
                                         result[i]['target'] = res[k]

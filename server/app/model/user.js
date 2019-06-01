@@ -1,11 +1,12 @@
 module.exports = app => {
-    const { STRING, INTEGER, DATE, UUID } = app.Sequelize;
+    const { STRING, INTEGER, DATE, UUID, UUIDV4 } = app.Sequelize;
 
     const User = app.model.define('users', {
         id: {
             type: UUID,
             primaryKey: true,
-            autoIncrement: true
+            autoIncrement: true,
+            defaultValue: UUIDV4
         },
         nickname: STRING(30),
         username: {

@@ -1,14 +1,14 @@
 module.exports = app => {
-    const {STRING, DATE, UUID, INTEGER} = app.Sequelize
+    const {STRING, DATE, INTEGER} = app.Sequelize
 
     const FriendsMsg = app.model.define('friendsmsgs', {
         id: {
-            type: UUID,
+            type: INTEGER,
             primaryKey: true,
             autoIncrement: true
         },
-        userid: INTEGER,
-        targetid: INTEGER,
+        userid: STRING,
+        targetid: STRING,
         opera: {
             type: INTEGER,
             defaultValue: 0
