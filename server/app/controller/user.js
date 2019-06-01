@@ -1,6 +1,7 @@
 const Controller = require('egg').Controller;
 
 class User extends Controller {
+    // 注册
     async register() {
         const { ctx } = this;
         let form = ctx.request.body
@@ -16,6 +17,7 @@ class User extends Controller {
             }
         })
     }
+    // 登陆
     async login() {
         const { app, ctx } = this;
         // 过期时间
@@ -56,6 +58,7 @@ class User extends Controller {
             }
         })
     }
+    // 退出登陆
     async logout () {
         const {ctx} = this
         await ctx.cookies.set('uid', null)
@@ -63,30 +66,19 @@ class User extends Controller {
         ctx.status = 200
         ctx.body = {}
     }
+    // 查询用户
     async get () {
         const {ctx} = this
         let form = ctx.request.body
-        let uid = ctx.cookies.get('uid')
         await ctx.service.user.findAll(form).then (async (data) => {
             if (data) {
-                let result = JSON.parse(JSON.stringify(data))
-                // 查找好友消息表中已发送的好友请求
-                await ctx.service.friendsMsg.findAllid(uid).then((res) => {
-                    // 对比搜索的用户中有没有已经发送好友请求的用户
-                    for (let i = 0; i < res.length; i++) {
-                        for (let k = 0; k < data.length; k++) {
-                            if (res[i].userid === data[k].id || res[i].targetid === data[k].id) {
-                                // 设置当前用户与目标用户关系为加好友但未通过：0：未通过；1：通过；
-                                result[k]['relation'] = 0
-                            }
-                        }
-                    }
-                    ctx.status = 200
-                    ctx.body = result
-                })
+                ctx.status = 200
+                ctx.body = data
             } else {
-                ctx.status = 400
-                ctx.body = {}
+                ctx.status = 403
+                ctx.body = {
+                    error: '没有此用户'
+                }
             }
         })
     }

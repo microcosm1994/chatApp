@@ -10,7 +10,7 @@
   "basePath": "/v2",
   "tags": [
     {
-      "name": "users",
+      "name": "user",
       "description": "用户api接口"
     },
     {
@@ -26,7 +26,7 @@
   "paths": {
     "/user/register": {
       "post": {
-        "tags": ["users"],
+        "tags": ["user"],
         "summary": "用户注册",
         "description": "/user/register",
         "operationId": "register",
@@ -61,7 +61,7 @@
                 }
               },
               "xml": {
-                "name": "users"
+                "name": "user"
               }
             }
           }
@@ -73,20 +73,12 @@
           "403": {
             "description": "账号已经被注册"
           }
-        },
-        "security": [
-          {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
-          }
-        ]
+        }
       }
     },
     "/user/login": {
       "post": {
-        "tags": ["users"],
+        "tags": ["user"],
         "summary": "用户登录",
         "description": "/user/login",
         "operationId": "login",
@@ -117,7 +109,7 @@
                 }
               },
               "xml": {
-                "name": "users"
+                "name": "user"
               }
             }
           }
@@ -129,15 +121,120 @@
           "403": {
             "description": "账号或密码错误"
           }
-        },
-        "security": [
+        }
+      }
+    },
+    "/user/logout": {
+      "post": {
+        "tags": ["user"],
+        "summary": "用户退出登陆",
+        "description": "此接口会删除服务端保存在客户端cookie中的用户id（uid）与token（t）",
+        "operationId": "logout",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "in": "body",
+            "name": "请求参数",
+            "description": "无",
+            "required": true
           }
-        ]
+        ],
+        "responses": {
+          "200": {
+            "description": "退出成功"
+          }
+        }
+      }
+    },
+    "/user/get": {
+      "post": {
+        "tags": ["user"],
+        "summary": "查询用户",
+        "description": "/user/get",
+        "operationId": "get",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/json",
+          "application/xml"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "请求参数",
+            "description": "用户昵称（||，&&）用户账号",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "username": {
+                  "type": "string",
+                  "example": "admin"
+                },
+                "nickname": {
+                  "type": "string",
+                  "example": "管理员"
+                }
+              },
+              "xml": {
+                "name": "user"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "返回用户数据",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "example": "4b235ad9-739b-468a-b0bd-94d07d259b6f"
+                },
+                "nickname": {
+                  "type": "string",
+                  "example": "1111"
+                },
+                "username": {
+                  "type": "string",
+                  "example": "1111"
+                },
+                "delete": {
+                  "type": "integer",
+                  "example": 0
+                },
+                "admin": {
+                  "type": "integer",
+                  "example": 0
+                },
+                "createtime": {
+                  "type": "date",
+                  "example": "date"
+                },
+                "updatetime": {
+                  "type": "date",
+                  "example": "date"
+                }
+              },
+              "xml": {
+                "name": "user"
+              }
+            }
+          },
+          "403": {
+            "description": "没有此用户"
+          }
+        }
       }
     }
   },

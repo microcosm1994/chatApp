@@ -67,6 +67,7 @@ export default class friends extends Component{
                 userid: this.state.uid
             }
             $axios.post('/api/friendsMsg/add', form).then((res) => {
+                console.log(res);
                 if (res.status === 200) {
                     message.success('好友请求已发送')
                 }
@@ -79,7 +80,7 @@ export default class friends extends Component{
             targetid: this.state.uid,
             opera: 0,
         }
-        $axios.post('/api/friendsMsg/get', form).then((res) => {
+        $axios.post('/api/friendsMsg/getList', form).then((res) => {
             if (res.status === 200) {
                 this.setState({friendsMsgList: res.data})
             }
@@ -234,8 +235,7 @@ export default class friends extends Component{
                                 dataSource={this.state.searchFriendsList}
                                 renderItem={item => (
                                     <List.Item
-                                        actions={[<a onClick={this.addFriends.bind(this, item.id)} disabled={item.relation - 0 === 0} state={item.relation}>加好友</a>]}
-                                    >
+                                        actions={[<a onClick={this.addFriends.bind(this, item.id)} >加好友</a>]}>
                                         <List.Item.Meta
                                             avatar={<Avatar shape="square" src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" />}
                                             title={<a href="https://ant.design">{item.nickname}</a>}

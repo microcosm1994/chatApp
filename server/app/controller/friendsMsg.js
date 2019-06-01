@@ -12,13 +12,29 @@ class FriendsMsg extends Controller{
             } else {
                 ctx.status = 403
                 ctx.body = {
-                    error: '好友请求已发送'
+                    error: '您已发送过好友请求，请等待对方处理。'
                 }
             }
         })
     }
     // 查找
     async get () {
+        let {ctx} = this
+        let form = ctx.request.body
+        await ctx.service.friendsMsg.findAll(form).then(async (data) => {
+            if (data) {
+                ctx.status = 200
+                ctx.body = data
+            } else {
+                ctx.status = 403
+                ctx.body = {
+                    error: '好友不存在'
+                }
+            }
+        })
+    }
+    // 查找消息列表
+    async getList () {
         let {ctx} = this
         let form = ctx.request.body
         await ctx.service.friendsMsg.findAll(form).then(async (data) => {
@@ -68,10 +84,10 @@ class FriendsMsg extends Controller{
         await ctx.service.friendsMsg.put(form.update, form.where).then(async data => {
             // 修改成功后再做对应的操作
             if (data[0]) {
-                console.log(data);
-                let userid = data[1].userid
-                let targetid = data[1].targetid
-                let opera = data[1].opera
+                let updata = await ctx.service.friendsMsg.findByPk(form.where.id)
+                let userid = updata.userid
+                let targetid = updata.targetid
+                let opera = updata.opera
                 // 如果接受好友请求，就在好友表中添加一条数据
                 if (opera === 1) {
                     await ctx.service.friends.create({userid: userid, targetid: targetid})

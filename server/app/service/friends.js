@@ -27,7 +27,7 @@ class friends extends Service {
     async find(obj) {
         const {app, ctx} = this;
         const {Op} = app.Sequelize
-        const data = await ctx.model.Friends.findAll({
+        return await ctx.model.Friends.findAll({
             where: {
                 [Op.or]: [
                     {userid: obj.uid},
@@ -35,7 +35,6 @@ class friends extends Service {
                 ]
             }
         })
-        return data
     }
 }
 

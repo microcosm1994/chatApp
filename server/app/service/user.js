@@ -37,14 +37,14 @@ class user extends Service {
         return user
     }
     // 按id数组查找
-    async findidArr (arr) {
+    async findidArr (idArr) {
         const {app, ctx} = this;
         const {Op} = app.Sequelize
         let uid = ctx.cookies.get('uid')
         const user = await ctx.model.User.findAll({
             where: {
                 id: {
-                    [Op.in]: arr,
+                    [Op.in]: idArr,
                     [Op.not]: uid,
                 }
             }
