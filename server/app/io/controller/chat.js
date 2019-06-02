@@ -1,0 +1,14 @@
+'use strict';
+
+const Controller = require('egg').Controller;
+
+class chat extends Controller {
+    async chat() {
+        const { ctx, app } = this;
+        const message = ctx.args[0];
+        console.log(message);
+        await ctx.socket.emit('res', `Hi! I've got your message: ${message}`);
+    }
+}
+
+module.exports = chat;

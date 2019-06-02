@@ -55,6 +55,24 @@ module.exports = appInfo => {
         prefix: '/public/',
         dir: path.join(appInfo.baseDir, '/app/public/')
     }
+    // socket.io
+    config.io = {
+        init: { }, // passed to engine.io
+        namespace: {
+            '/': {
+                connectionMiddleware: ['connection'],
+                packetMiddleware: [],
+            },
+            '/chat': {
+                connectionMiddleware: ['connection'],
+                packetMiddleware: [],
+            },
+            '/example': {
+                connectionMiddleware: ['connection'],
+                packetMiddleware: [],
+            },
+        },
+    };
     // add your user config here
     const userConfig = {
         // myAppName: 'egg',

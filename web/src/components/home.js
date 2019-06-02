@@ -3,7 +3,12 @@ import {Layout, Menu, Icon, Avatar, Dropdown } from 'antd'
 import { Switch } from 'react-router-dom'
 import { renderRoutes } from 'react-router-config'
 import cookie from 'react-cookies'
+import io from 'socket.io-client'
 import {$axios} from "../lib/interceptors";
+// connect方法的作用：将额外的props传递给组件，并返回新的组件，组件在该过程中不会受到影响
+import { connect } from 'react-redux'
+// 引入action
+import { setPageTitle, setInfoList } from '../store/action'
 import Friends from './friends'
 import '../css/home.css'
 
@@ -13,6 +18,7 @@ const MenuItemGroup = Menu.ItemGroup;
 class Home extends Component{
     constructor (props) {
         super(props)
+        console.log(props);
         this.state = {
             route: props.route.routes,
             user: {
@@ -21,6 +27,15 @@ class Home extends Component{
                 token: cookie.load('t')
             }
         }
+    }
+    componentDidMount () {
+        // 创建socket连接
+        const socket = io('ws://localhost:7001', {
+            reconnectionAttempts: 10,
+            query: {
+                uid: this.state.user.uid
+            }
+        })
     }
     handleClick = e => {
         let path = e.item.props.path
@@ -139,4 +154,29 @@ class Home extends Component{
         )
     }
 }
-export default Home
+const mapStateToProps = (state) => {
+    return {
+        pageTitle: state.pageTitle,
+        infoList: state.infoList
+    }
+}
+
+// mapDispatchToProps：将dispatch映射到组件的props中
+const mapDispatchToProps = (dispatch, ownProps) => {
+    return {
+        setPageTitle (data) {
+            // 如果不懂这里的逻辑可查看前面对redux-thunk的介绍
+            dispatch(setPageTitle(data))
+            // 执行setPageTitle会返回一个函数
+            // 这正是redux-thunk的所用之处:异步action
+            // 上行代码相当于
+            /*dispatch((dispatch, getState) => {
+                dispatch({ type: 'SET_PAGE_TITLE', data: data })
+            )*/
+        },
+        setInfoList (data) {
+            dispatch(setInfoList(data))
+        }
+    }
+}
+export default connect(mapStateToProps, mapDispatchToProps)(Home)

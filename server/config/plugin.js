@@ -16,4 +16,9 @@ module.exports.redis = {
     enable: true,
     package: 'egg-redis',
 };
+// socket.io
+module.exports.io = {
+    enable: true,
+    package: 'egg-socket.io',
+};
 

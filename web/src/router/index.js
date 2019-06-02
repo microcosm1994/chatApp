@@ -9,6 +9,7 @@ export default {
     routes: [
         {
             path: '/login',
+            exact: true,
             component: login,
             routes: [
                 {
