@@ -4,10 +4,33 @@ import { combineReducers } from 'redux'
 import defaultState from './state.js'
 
 // 一个reducer就是一个函数
-function pageTitle (state = defaultState.pageTitle, action) {
-    // 不同的action有不同的处理逻辑
+function user (state = defaultState.user, action) {
     switch (action.type) {
-        case 'SET_PAGE_TITLE':
+        case 'SET_USER':
+            return action.data
+        default:
+            return state
+    }
+}
+function targetInfo (state = defaultState.targetInfo, action) {
+    switch (action.type) {
+        case 'SET_TARGET_INFO':
+            return action.data
+        default:
+            return state
+    }
+}
+function socket (state = defaultState.socket, action) {
+    switch (action.type) {
+        case 'SET_SOCKET':
+            return action.data
+        default:
+            return state
+    }
+}
+function chatWindow (state = defaultState.chatWindow, action) {
+    switch (action.type) {
+        case 'SET_CHAT_WINDOW':
             return action.data
         default:
             return state
@@ -25,6 +48,9 @@ function infoList (state = defaultState.infoList, action) {
 
 // 导出所有reducer
 export default combineReducers({
-    pageTitle,
+    user,
+    targetInfo,
+    socket,
+    chatWindow,
     infoList
 })

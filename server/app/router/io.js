@@ -1,4 +1,4 @@
 module.exports = app => {
     const { io } = app;
-    io.of('/').route('chat', io.controller.chat.chat)
+    io.of('/').route('CHAT_SEND', io.controller.chat.chat)
 }

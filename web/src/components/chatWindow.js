@@ -1,14 +1,22 @@
 import React, {Component} from 'react'
 import {Button, Icon } from 'antd'
+import {connect} from 'react-redux'
+import {setTargetInfo, setChatWindow} from '../store/action'
 import '../css/chatWindow.css'
 
-export default class chatWindow extends Component{
+class chatWindow extends Component{
     constructor (props) {
         super(props)
         this.state = {}
     }
     componentDidMount () {
-        console.log(this);
+        const {setChatWindow} = this.props
+        setChatWindow(this.refs.chatWindow)
+    }
+    componentDidUpdate (prevProps, prevState) {
+        if (this.props.socket) {
+            this.recvMessage()
+        }
     }
     drag (e) {
         let self = this
@@ -49,16 +57,35 @@ export default class chatWindow extends Component{
             flag = false
         }
     }
+    // 关闭聊天窗口
     close () {
-        console.log(this);
         this.refs.chatWindow.style.display = 'none'
+    }
+    // 发送消息
+    sendMessage () {
+        const {socket, user, targetInfo} = this.props
+        let value = this.refs.chatWindowReply.innerHTML
+        if (value) {
+            socket.emit('CHAT_SEND', {
+                user,
+                targetInfo,
+                sid: socket.id
+            }, value)
+        }
+    }
+    // 接收消息
+    recvMessage () {
+        const {socket, user, targetInfo} = this.props
+        socket.on('CHAT_RES', res => {
+            console.log(res);
+        })
     }
     render () {
         return(
             <div className='chatWindow' ref='chatWindow'>
                 <div className='chatWindow-header' onMouseDown={this.drag.bind(this)}>
                     <div className='chatWindow-header-name'>
-                        ssadsad
+                        {this.props.targetInfo.nickname}
                     </div>
                     <div className='chatWindow-header-close' onClick={this.close.bind(this)}>
                         <Icon type="close" />
@@ -71,12 +98,31 @@ export default class chatWindow extends Component{
                     <div className='chatWindow-body-toolbar'>
 
                     </div>
-                    <div className='chatWindow-body-reply' contentEditable='true'></div>
+                    <div className='chatWindow-body-reply' contentEditable='true' ref='chatWindowReply'></div>
                     <div className='chatWindow-body-btnBox'>
-                        <Button size='small' type="primary">发送</Button>
+                        <Button size='small' type="primary" onClick={this.sendMessage.bind(this)}>发送</Button>
                     </div>
                 </div>
             </div>
         )
     }
 }
+function mapStateToProps (state, ownProps) {
+    return {
+        user: state.user,
+        socket: state.socket,
+        targetInfo: state.targetInfo,
+        chatWindow: state.chatWindow
+    }
+}
+function mapDispatchToProps (dispatch, ownProps) {
+    return {
+        setTargetInfo (data) {
+            dispatch(setTargetInfo(data))
+        },
+        setChatWindow (data) {
+            dispatch(setChatWindow(data))
+        }
+    }
+}
+export default connect(mapStateToProps, mapDispatchToProps)(chatWindow)

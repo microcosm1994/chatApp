@@ -2,10 +2,13 @@ import React, {Component} from 'react'
 import {Icon, Avatar, Tabs, Input, List, message } from 'antd'
 import {$axios} from "../lib/interceptors";
 import '../css/friends.css'
+import {connect} from 'react-redux'
+// 引入action
+import {setTargetInfo} from '../store/action'
 
 const TabPane = Tabs.TabPane;
 const Search = Input.Search;
-export default class friends extends Component{
+class friends extends Component{
     constructor (props) {
         super(props)
         this.state = {
@@ -37,7 +40,7 @@ export default class friends extends Component{
     // 获取好友列表
     getFriends () {
         let form = {
-            uid: this.state.uid
+            uid: this.props.user.uid
         }
         $axios.post('/api/friends/get', form).then((res) => {
             if (res.status === 200) {
@@ -119,6 +122,12 @@ export default class friends extends Component{
         })
     }
     // 标记已读
+    // 双击打开聊天窗口
+    openChatWindow (row) {
+        const {setTargetInfo, chatWindow} = this.props
+        setTargetInfo(row)
+        chatWindow.style.display = 'block'
+    }
     // 显示模态框
     modalShow () {
         this.refs.friendsModal.style.display = 'block'
@@ -178,7 +187,8 @@ export default class friends extends Component{
                                             itemLayout="horizontal"
                                             dataSource={this.state.friendsList}
                                             renderItem={item => (
-                                                <List.Item>
+                                                <List.Item actions={[
+                                                    <ListBtn click={this.openChatWindow.bind(this, item.targetInfo, 1)} text='聊天' self={this} data={item} />]}>
                                                     <List.Item.Meta
                                                         avatar={<Avatar src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" />}
                                                         title={<a href="https://ant.design">{item.targetInfo.nickname}</a>}
@@ -264,3 +274,19 @@ export default class friends extends Component{
 function ListBtn(props) {
     return <a onClick={props.click} disabled={props.data.relation - 0 === 0} state={props.data.relation}>{props.text}</a>
 }
+function mapStateToProps (state, ownProps) {
+    return {
+        user: state.user,
+        socket: state.socket,
+        targetInfo: state.targetInfo,
+        chatWindow: state.chatWindow
+    }
+}
+function mapDispatchToProps (dispatch, ownProps) {
+    return {
+        setTargetInfo (data) {
+            dispatch(setTargetInfo(data))
+        }
+    }
+}
+export default connect(mapStateToProps, mapDispatchToProps)(friends)

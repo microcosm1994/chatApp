@@ -5,11 +5,11 @@ import { renderRoutes } from 'react-router-config'
 import cookie from 'react-cookies'
 import io from 'socket.io-client'
 import {$axios} from "../lib/interceptors";
-// connect方法的作用：将额外的props传递给组件，并返回新的组件，组件在该过程中不会受到影响
-import { connect } from 'react-redux'
+import {connect} from 'react-redux'
 // 引入action
-import { setPageTitle, setInfoList } from '../store/action'
+import {setUser, setSocket} from '../store/action'
 import Friends from './friends'
+import ChatWindow from './chatWindow'
 import '../css/home.css'
 
 const { Header, Sider, Content } = Layout
@@ -18,7 +18,7 @@ const MenuItemGroup = Menu.ItemGroup;
 class Home extends Component{
     constructor (props) {
         super(props)
-        console.log(props);
+        const {setUser} = props
         this.state = {
             route: props.route.routes,
             user: {
@@ -27,6 +27,7 @@ class Home extends Component{
                 token: cookie.load('t')
             }
         }
+        setUser(this.state.user)
     }
     componentDidMount () {
         // 创建socket连接
@@ -36,6 +37,7 @@ class Home extends Component{
                 uid: this.state.user.uid
             }
         })
+        this.props.setSocket(socket) // 保存socket实例
     }
     handleClick = e => {
         let path = e.item.props.path
@@ -149,34 +151,26 @@ class Home extends Component{
                         </Switch>
                     </Content>
                 </Layout>
-                <Friends uid={this.state.user.uid}></Friends>
+                <Friends history={this.props.history} uid={this.state.user.uid}></Friends>
+                <ChatWindow></ChatWindow>
             </Layout>
         )
     }
 }
-const mapStateToProps = (state) => {
+function mapStateToProps (state, ownProps) {
     return {
-        pageTitle: state.pageTitle,
-        infoList: state.infoList
+        user: state.user
     }
 }
-
-// mapDispatchToProps：将dispatch映射到组件的props中
-const mapDispatchToProps = (dispatch, ownProps) => {
+function mapDispatchToProps (dispatch, ownProps) {
     return {
-        setPageTitle (data) {
-            // 如果不懂这里的逻辑可查看前面对redux-thunk的介绍
-            dispatch(setPageTitle(data))
-            // 执行setPageTitle会返回一个函数
-            // 这正是redux-thunk的所用之处:异步action
-            // 上行代码相当于
-            /*dispatch((dispatch, getState) => {
-                dispatch({ type: 'SET_PAGE_TITLE', data: data })
-            )*/
+        setUser (data) {
+            dispatch(setUser(data))
         },
-        setInfoList (data) {
-            dispatch(setInfoList(data))
+        setSocket (data) {
+            dispatch(setSocket(data))
         }
     }
 }
 export default connect(mapStateToProps, mapDispatchToProps)(Home)
+
