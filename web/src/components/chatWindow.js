@@ -1,44 +1,61 @@
 import React, {Component} from 'react'
-import ReactDOM from 'react-dom'
-import {Button, Icon, Avatar } from 'antd'
+import {Button, Icon, Avatar} from 'antd'
 import {connect} from 'react-redux'
 import {setTargetInfo, setChatWindow} from '../store/action'
+import store from '../store/index'
 import {$axios} from '../lib/interceptors'
 import '../css/chatWindow.css'
 
-class chatWindow extends Component{
-    constructor (props) {
+class chatWindow extends Component {
+    constructor(props) {
         super(props)
         this.state = {
             msgContent: []
         }
+        // 监听state状态改变
+        store.subscribe(() => {
+            // state状态改变了，新状态如下
+            const state = store.getState()
+            if (state.targetInfo.id) {
+                // this.get()
+            }
+        })
     }
-    componentDidMount () {
+
+    componentDidMount() {
         const {setChatWindow} = this.props
         setChatWindow(this.refs.chatWindow)
-        this.recvMessage()
-        this.get()
     }
-    componentWillUnmount () {
+
+    componentWillReceiveProps(nextProps) {
+        console.log(nextProps);
+        if (nextProps.targetInfo.id) {
+            this.get(nextProps)
+        }
+        if (nextProps.socket) {
+            this.recvMessage(nextProps)
+        }
+    }
+
+    componentWillUnmount() {
         console.log('close');
     }
+
     // 获取聊天数据
-    get () {
-        const {user, targetInfo} = this.props
+    get(props) {
+        const {user, targetInfo} = props
         if (user.uid && targetInfo.id) {
             let form = {}
             form.userid = user.uid
             form.targetid = targetInfo.id
             $axios.post('/api/msgrecord/get', form).then(res => {
-                console.log(res);
+                console.log(res.data);
+                this.updateView(res.data)
             })
-        } else {
-            setTimeout(() => {
-                this.get()
-            }, 500)
         }
     }
-    drag (e) {
+
+    drag(e) {
         let self = this
         let flag = true
         let clientX = e.clientX - this.refs.chatWindow.offsetLeft
@@ -77,13 +94,14 @@ class chatWindow extends Component{
             flag = false
         }
     }
+
     // 关闭聊天窗口
-    close () {
+    close() {
         this.refs.chatWindow.style.display = 'none'
-        ReactDOM.unmountComponentAtNode(this.refs.chatWindow)
     }
+
     // 发送消息
-    sendMessage () {
+    sendMessage() {
         const {socket, user, targetInfo} = this.props
         let value = this.refs.chatWindowReply.innerHTML
         if (value) {
@@ -101,24 +119,28 @@ class chatWindow extends Component{
             })
         }
     }
+
     // 接收消息
-    recvMessage () {
-        const {socket} = this.props
-        try {
-            socket.on('CHAT_RES', res => {
-                if (res.status === 200) {
-                    this.updateView(res.data)
-                }
-            })
-        } catch (e) {
-            setTimeout(() => {
-                this.recvMessage()
-            }, 500)
-        }
+    recvMessage(props) {
+        const {socket} = props
+        socket.on('CHAT_RES', res => {
+            if (res.status === 200) {
+                this.updateView(res.data)
+            }
+        })
     }
+
     // 更新页面视图
-    updateView (data) {
-        this.state.msgContent.push(data)
+    updateView(data) {
+        let type = Object.prototype.toString.call(data)
+        switch (type) {
+            case '[object Array]':
+                this.state.msgContent = data
+                break
+            default:
+                this.state.msgContent.push(data)
+                break
+        }
         // 更新视图
         this.setState({
             msgContent: this.state.msgContent
@@ -126,16 +148,17 @@ class chatWindow extends Component{
         // 聊天界面滚动条一直保持在底部
         this.refs.msgContent.scrollTop = this.refs.msgContent.scrollHeight
     }
-    render () {
+
+    render() {
         const {uid} = this.props.user
-        return(
+        return (
             <div className='chatWindow' ref='chatWindow'>
                 <div className='chatWindow-header' onMouseDown={this.drag.bind(this)}>
                     <div className='chatWindow-header-name'>
                         {this.props.targetInfo.nickname}
                     </div>
                     <div className='chatWindow-header-close' onClick={this.close.bind(this)}>
-                        <Icon type="close" />
+                        <Icon type="close"/>
                     </div>
                 </div>
                 <div className='chatWindow-body'>
@@ -156,6 +179,7 @@ class chatWindow extends Component{
         )
     }
 }
+
 // 聊天消息组件
 function MsgContent(props) {
     let html = props.data.map((item, index) => {
@@ -175,17 +199,19 @@ function MsgContent(props) {
             </div>
             <div className={'msgContent-container ' + contentName} style={direction}>
                 <div className='msgContent-container-avator'>
-                    <Avatar src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" />
+                    <Avatar src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"/>
                 </div>
                 <div className='msgContent-container-content'>
-                    <div className='msgContent-container-content-box' dangerouslySetInnerHTML={{__html: item.content}}></div>
+                    <div className='msgContent-container-content-box'
+                         dangerouslySetInnerHTML={{__html: item.content}}></div>
                 </div>
             </div>
         </div>)
     })
     return (<div>{html}</div>)
 }
-function mapStateToProps (state, ownProps) {
+
+function mapStateToProps(state, ownProps) {
     return {
         user: state.user,
         socket: state.socket,
@@ -193,14 +219,16 @@ function mapStateToProps (state, ownProps) {
         chatWindow: state.chatWindow
     }
 }
-function mapDispatchToProps (dispatch, ownProps) {
+
+function mapDispatchToProps(dispatch, ownProps) {
     return {
-        setTargetInfo (data) {
+        setTargetInfo(data) {
             dispatch(setTargetInfo(data))
         },
-        setChatWindow (data) {
+        setChatWindow(data) {
             dispatch(setChatWindow(data))
         }
     }
 }
+
 export default connect(mapStateToProps, mapDispatchToProps)(chatWindow)
