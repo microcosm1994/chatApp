@@ -42,12 +42,91 @@
   .chatWindow-body{
     width: 100%;
     height: 560px;
-    .chatWindow-body-chat{
+    .chatWindow-body-chat-box{
       width: 670px;
       height: 400px;
       margin: 0 auto;
-      margin-top: 10px;
-      background: #ffffff;
+      overflow: hidden;
+      .chatWindow-body-chat{
+        width: 103%;
+        padding-bottom: 150px;
+        height: 400px;
+        overflow: auto;
+        background: #F5F5F5;
+        .msgContent{
+          width: 100%;
+          padding: 15px 10px;
+          overflow: hidden;
+          .msgContent-time{
+            width: 100%;
+            .msgContent-time-span{
+              text-align: center;
+              font-size: 12px;
+              height: 20px;
+              background: #DADADA;
+              color:#fff;
+              line-height: 20px;
+              padding: 0px 5px;
+              border-radius: 4px;
+            }
+          }
+          .msgContent-container{
+            width: 50%;
+            margin-top: 15px;
+            position: relative;
+            &.direction-left{
+              .msgContent-container-avator{
+                width: 30px;
+                height: 30px;
+                position: absolute;
+                left: 4px;
+                top: 30%;
+                transform: translateY(-50%);
+              }
+              .msgContent-container-content{
+                width: max-content;
+                max-width: 100%;
+                word-break: break-all;
+                padding-left: 45px;
+                float: left;
+                .msgContent-container-content-box{
+                  background: #999999;
+                  width: 100%;
+                  min-height: 30px;
+                  text-align: left;
+                  padding: 2px 5px;
+                  border-radius: 4px;
+                }
+              }
+            }
+            &.direction-right{
+              .msgContent-container-avator{
+                width: 30px;
+                height: 30px;
+                position: absolute;
+                right: 4px;
+                top: 30%;
+                transform: translateY(-50%);
+              }
+              .msgContent-container-content{
+                width: max-content;
+                max-width: 100%;
+                word-break: break-all;
+                padding-right: 45px;
+                float: right;
+                .msgContent-container-content-box{
+                  background: #999999;
+                  min-height: 30px;
+                  text-align: left;
+                  padding: 2px 5px;
+                  border-radius: 4px;
+                  overflow: hidden;
+                }
+              }
+            }
+          }
+        }
+      }
     }
     .chatWindow-body-toolbar{
       width: 670px;

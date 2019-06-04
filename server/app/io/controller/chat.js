@@ -11,25 +11,28 @@ class chat extends Controller {
         // 广播
         // app.io.emit('CHAT_RES', message)
         let result = {}
-        // 使用用户的socket实例发送消息
-        if (usocket[info.targetInfo.id]) {
-            result.status = 200
-            result.data = {
-                source: info.user.uid,
-                time: Date.now(),
-                message
-            }
-            await usocket[info.targetInfo.id].emit('CHAT_RES', result)
-        } else {
-            result.status = 403
-            result.data = {
-                source: info.user.uid,
-                time: Date.now(),
-                type: '离线',
-                message,
-            }
-            await usocket[info.user.uid].emit('CHAT_RES', result)
+        result.data = {
+            userid: info.userid,
+            createtime: Date.now(),
+            targetid: info.targetid,
+            content: message
         }
+        await ctx.service.msgrecord.create(result.data).then(async res => {
+            console.log(res);
+            if (res) {
+                // 使用用户的socket实例发送消息
+                if (usocket[info.targetid]) {
+                    result.status = 200
+
+                    await usocket[info.targetid].emit('CHAT_RES', result)
+                }
+            } else {
+                ctx.status = 403
+                ctx.body = {
+                    error: '服务器错误'
+                }
+            }
+        })
     }
 }
 
