@@ -15,7 +15,6 @@ class user extends Service {
     }
     async findOne (obj) {
         const ctx = this.ctx;
-        console.log(ctx.model);
         const user = await ctx.model.User.findOne({where: obj})
         return user
     }

@@ -14,6 +14,7 @@ class friends extends Component{
         super(props)
         this.state = {
             uid: props.uid,
+            unreadChat: false,
             friendsList: [], // 好友列表
             searchFriendsList: [], // 搜索好友列表
             friendsMsgList: [], // 好友消息列表
@@ -28,6 +29,7 @@ class friends extends Component{
     tabHandler (key) {
         if (key === '1' || key === '1-1') {
             this.getFriends()
+            this.setState({unreadChat: false})
         }
         if (key === '1-2') {
             console.log('群组');
@@ -63,6 +65,9 @@ class friends extends Component{
             if (res.status === 200) {
                 let friendsList = this.state.friendsList
                 let count = 0 // 未读消息计数
+                if (res.data.length > 0) {
+                    this.setState({unreadChat: true})
+                }
                 for (let i = 0; i < friendsList.length; i++) {
                     for (let k = 0 ; k < res.data.length; k++) {
                         if (friendsList[i].targetInfo.id === res.data[k].userid) {
@@ -84,7 +89,7 @@ class friends extends Component{
                 friendsList[i]['unread'] += 1
             }
         }
-        this.setState({friendsList})
+        this.setState({friendsList, unreadChat: true})
     }
     // 搜索用户
     searchFriends (value) {
@@ -108,7 +113,6 @@ class friends extends Component{
                 userid: this.state.uid
             }
             $axios.post('/api/friendsMsg/add', form).then((res) => {
-                console.log(res);
                 if (res.status === 200) {
                     message.success('好友请求已发送')
                 }
@@ -159,17 +163,26 @@ class friends extends Component{
             }
         })
     }
-    // 标记已读
-    // 双击打开聊天窗口
+    // 打开聊天窗口
     openChatWindow (row) {
         const {setTargetInfo} = this.props
         setTargetInfo(row)
         // 清除未读消息
         let friendsList = this.state.friendsList
+        let flag = false
         for (let i = 0; i < friendsList.length; i++) {
+            // 当前聊天用户的未读消息清零
             if (friendsList[i].targetInfo.id === row.id) {
                 friendsList[i]['unread'] = 0
             }
+            // 判断如果有一条消息未读，则红点就继续存在
+            if (friendsList[i]['unread'] > 1) {
+                flag = true
+            }
+        }
+        // 判断如果没有未读消息，则红点就消失
+        if (!flag) {
+            this.setState({unreadChat: flag})
         }
         this.setState({friendsList})
         // 调用父组件的方法渲染聊天窗口子组件
@@ -229,7 +242,7 @@ class friends extends Component{
                         <Tabs defaultActiveKey="1" type="card" tabPosition='bottom' onChange={this.tabHandler.bind(this)}>
                             <TabPane tab="聊天" key="1">
                                 <Tabs size='small' defaultActiveKey="1-1" onChange={this.tabHandler.bind(this)}>
-                                    <TabPane tab="好友" key="1-1">
+                                    <TabPane tab={<Badge dot={this.state.unreadChat}>好友</Badge>} key="1-1">
                                         <List
                                             itemLayout="horizontal"
                                             dataSource={this.state.friendsList}
