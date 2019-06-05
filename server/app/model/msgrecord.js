@@ -13,7 +13,15 @@ module.exports = app => {
             type: DATE,
             defaultValue: DATE.NOW
         },
-        content: STRING
+        content: STRING,
+        state: {
+            type: INTEGER,
+            defaultValue: 0
+        },
+        delete: {
+            type: INTEGER,
+            defaultValue: 0
+        }
     }, {
         timestamps: false
     })

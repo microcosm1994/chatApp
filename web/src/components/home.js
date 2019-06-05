@@ -9,7 +9,7 @@ import {connect} from 'react-redux'
 // 引入action
 import {setUser, setSocket} from '../store/action'
 import Friends from './friends'
-import ChatWindow from './chatWindow'
+import ChatWindow from "./chatWindow";
 import '../css/home.css'
 
 const { Header, Sider, Content } = Layout
@@ -21,6 +21,7 @@ class Home extends Component{
         const {setUser} = props
         this.state = {
             route: props.route.routes,
+            isrender: false,
             user: {
                 nickname: cookie.load('nickname'),
                 uid: cookie.load('uid'),
@@ -38,6 +39,43 @@ class Home extends Component{
             }
         })
         this.props.setSocket(socket) // 保存socket实例
+        this.recvMessage(socket)
+    }
+    // 获取聊天窗口子组件
+    onRef (name, ref) {
+        switch (name) {
+            case 'chatWindow':
+                this.chatWindow = ref
+                break
+            case 'friends':
+                this.friends = ref
+                break
+            default:
+                break
+        }
+    }
+    // 销毁聊天窗口组件
+    setIsrender (state) {
+        this.setState({
+            isrender: state
+        })
+        this.chatWindow = null
+    }
+    // 接收消息
+    recvMessage(socket) {
+        socket.on('CHAT_RES', res => {
+            if (res.status === 200) {
+                // 等待组件挂载之后获取到子组件的实例之后，调用子组件的更新视图方法
+                if (this.chatWindow) {
+                    this.chatWindow.updateView(res.data)
+                }
+                // 判断friends子组件实例和chatWindow子组件实例，如果chatWindow组件实例存在，则代表最新消息已经读过，不用更新未读消息数
+                if (this.friends && !this.chatWindow) {
+                    // 更新子组件未读消息数
+                    this.friends.setUnread(res.data.userid)
+                }
+            }
+        })
     }
     handleClick = e => {
         let path = e.item.props.path
@@ -67,7 +105,7 @@ class Home extends Component{
                     退 出
                 </Menu.Item>
             </Menu>
-        );
+        )
         return(
             <Layout className='home'>
                 {/*头部*/}
@@ -151,12 +189,25 @@ class Home extends Component{
                         </Switch>
                     </Content>
                 </Layout>
-                <Friends history={this.props.history} uid={this.state.user.uid}></Friends>
-                <ChatWindow></ChatWindow>
+                <Friends
+                    destroy={this.setIsrender.bind(this)}
+                    history={this.props.history}
+                    uid={this.state.user.uid}
+                    onRef={this.onRef.bind(this)}
+                />
+                <div id='chatWindowContainer'>
+                    {this.state.isrender ? (
+                        <ChatWindow
+                            destroy={this.setIsrender.bind(this)}
+                            onRef={this.onRef.bind(this)}
+                        />
+                    ) : null}
+                </div>
             </Layout>
         )
     }
 }
+
 function mapStateToProps (state, ownProps) {
     return {
         user: state.user

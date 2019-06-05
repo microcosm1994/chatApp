@@ -1,5 +1,6 @@
 import React, {Component} from 'react'
-import {Icon, Avatar, Tabs, Input, List, message } from 'antd'
+import ReactDOM from 'react-dom'
+import {Icon, Avatar, Tabs, Input, List, message, Badge } from 'antd'
 import {$axios} from "../lib/interceptors";
 import '../css/friends.css'
 import {connect} from 'react-redux'
@@ -21,6 +22,7 @@ class friends extends Component{
     }
     componentDidMount () {
         this.getFriends()
+        this.props.onRef('friends', this)
     }
     // 切换好友、聊天组tab栏
     tabHandler (key) {
@@ -44,9 +46,45 @@ class friends extends Component{
         }
         $axios.post('/api/friends/get', form).then((res) => {
             if (res.status === 200) {
+                let idArr = []
+                for (let i = 0; i < res.data.length; i++) {
+                    if (!idArr.includes(res.data[i].targetInfo.id)) {
+                        idArr.push(res.data[i].targetInfo.id)
+                    }
+                }
+                this.getUnread(idArr)
                 this.setState({friendsList: res.data})
             }
         })
+    }
+    // 获取未读消息
+    getUnread (idArr) {
+        $axios.post('/api/msgrecord/getUnread', {userid: idArr}).then((res) => {
+            if (res.status === 200) {
+                let friendsList = this.state.friendsList
+                let count = 0 // 未读消息计数
+                for (let i = 0; i < friendsList.length; i++) {
+                    for (let k = 0 ; k < res.data.length; k++) {
+                        if (friendsList[i].targetInfo.id === res.data[k].userid) {
+                            count++
+                        }
+                    }
+                    friendsList[i]['unread'] = count
+                    count = 0 // 消息计数归0
+                }
+                this.setState({friendsList})
+            }
+        })
+    }
+    // 设置未读消息
+    setUnread (userid) {
+        let friendsList = this.state.friendsList
+        for (let i = 0; i < friendsList.length; i++) {
+            if (friendsList[i].targetInfo.id === userid) {
+                friendsList[i]['unread'] += 1
+            }
+        }
+        this.setState({friendsList})
     }
     // 搜索用户
     searchFriends (value) {
@@ -124,9 +162,18 @@ class friends extends Component{
     // 标记已读
     // 双击打开聊天窗口
     openChatWindow (row) {
-        const {setTargetInfo, chatWindow} = this.props
+        const {setTargetInfo} = this.props
         setTargetInfo(row)
-        chatWindow.style.display = 'block'
+        // 清除未读消息
+        let friendsList = this.state.friendsList
+        for (let i = 0; i < friendsList.length; i++) {
+            if (friendsList[i].targetInfo.id === row.id) {
+                friendsList[i]['unread'] = 0
+            }
+        }
+        this.setState({friendsList})
+        // 调用父组件的方法渲染聊天窗口子组件
+        this.props.destroy(true)
     }
     // 显示模态框
     modalShow () {
@@ -190,7 +237,7 @@ class friends extends Component{
                                                 <List.Item actions={[
                                                     <ListBtn click={this.openChatWindow.bind(this, item.targetInfo, 1)} text='聊天' self={this} data={item} />]}>
                                                     <List.Item.Meta
-                                                        avatar={<Avatar src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" />}
+                                                        avatar={<Badge count={item.unread}><Avatar src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" /></Badge>}
                                                         title={<a href="https://ant.design">{item.targetInfo.nickname}</a>}
                                                         description=""
                                                     />

@@ -18,7 +18,6 @@ class chat extends Controller {
             content: message
         }
         await ctx.service.msgrecord.create(result.data).then(async res => {
-            console.log(res);
             if (res) {
                 // 使用用户的socket实例发送消息
                 if (usocket[info.targetid]) {

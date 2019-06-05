@@ -13,6 +13,7 @@
     "react-router-config": "^5.0.0",
     "react-router-dom": "^5.0.0",
     "react-scripts": "1.0.0",
+    "react.eval": "^1.4.17",
     "redux": "^4.0.1",
     "redux-devtools": "^3.5.0",
     "redux-thunk": "^2.3.0",

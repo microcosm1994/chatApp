@@ -25,20 +25,14 @@ class chatWindow extends Component {
     componentDidMount() {
         const {setChatWindow} = this.props
         setChatWindow(this.refs.chatWindow)
+        // 把子组件实例传给父组件
+        this.props.onRef('chatWindow', this)
     }
 
     componentWillReceiveProps(nextProps) {
-        console.log(nextProps);
         if (nextProps.targetInfo.id) {
             this.get(nextProps)
         }
-        if (nextProps.socket) {
-            this.recvMessage(nextProps)
-        }
-    }
-
-    componentWillUnmount() {
-        console.log('close');
     }
 
     // 获取聊天数据
@@ -49,7 +43,6 @@ class chatWindow extends Component {
             form.userid = user.uid
             form.targetid = targetInfo.id
             $axios.post('/api/msgrecord/get', form).then(res => {
-                console.log(res.data);
                 this.updateView(res.data)
             })
         }
@@ -97,7 +90,15 @@ class chatWindow extends Component {
 
     // 关闭聊天窗口
     close() {
-        this.refs.chatWindow.style.display = 'none'
+        // 销毁聊天窗口之前先修改目前（当前聊天好友）所有未读消息为已读
+        const {targetInfo} = this.props
+        if (targetInfo.id) {
+            let form = {}
+            form.targetid = targetInfo.id
+            $axios.post('/api/msgrecord/setRead', form)
+            this.refs.chatWindow.style.display = 'none'
+            this.props.destroy(false)
+        }
     }
 
     // 发送消息
@@ -118,16 +119,6 @@ class chatWindow extends Component {
                 content: value
             })
         }
-    }
-
-    // 接收消息
-    recvMessage(props) {
-        const {socket} = props
-        socket.on('CHAT_RES', res => {
-            if (res.status === 200) {
-                this.updateView(res.data)
-            }
-        })
     }
 
     // 更新页面视图

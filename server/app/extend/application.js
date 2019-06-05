@@ -1,15 +1,15 @@
-module.exports.state = {}
+let state = {}
 module.exports.usocket = {
     getState: () => {
-        return this.state
+        return state
     },
     setState: (key, value) => {
         if (key && value) {
-            this.state[key] = value
+            state[key] = value
         }
     },
     clearState: () => {
-        this.state = null
-        this.state = {}
+        state = null
+        state = {}
     }
 }

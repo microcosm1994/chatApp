@@ -32,11 +32,6 @@ export default {
                     path: '/message',
                     exact: true,
                     component: message,
-                },
-                {
-                    path: '/chatWindow',
-                    exact: true,
-                    component: chatWindow,
                 }
             ]
         }
