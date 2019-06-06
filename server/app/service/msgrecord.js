@@ -10,16 +10,19 @@ class msgrecord extends Service{
         const {app, ctx} = this;
         const {Op} = app.Sequelize
         return await ctx.model.Msgrecord.findAll({
+            order: [
+                ['createtime', 'asc']
+            ],
             where: {
                 [Op.or]: [
-                    { [Op.and]: [
-                            { userid: obj.userid},
-                            { targetid: obj.targetid}
-                        ]},
-                    { [Op.and]: [
-                            { userid: obj.targetid},
-                            { targetid: obj.userid}
-                        ]}
+                    {
+                        userid: obj.userid,
+                        targetid: obj.targetid
+                    },
+                    {
+                        userid: obj.targetid,
+                        targetid: obj.userid
+                    }
                 ]
             }
         })

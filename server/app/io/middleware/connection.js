@@ -14,6 +14,6 @@ module.exports = app => {
         }
         await next();
         // 断开连接时执行.
-        app.usocket.clearState()
+        app.usocket.removeState(query.uid)
     }
 }

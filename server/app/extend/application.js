@@ -8,6 +8,11 @@ module.exports.usocket = {
             state[key] = value
         }
     },
+    removeState: (key) => {
+        if (state[key]) {
+            delete state[key]
+        }
+    },
     clearState: () => {
         state = null
         state = {}

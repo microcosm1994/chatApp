@@ -1,0 +1,38 @@
+.chatVideos {
+  width: 400px;
+  height: 600px;
+}
+.chatVideos .chatVideos-t {
+  width: 100%;
+  height: 360px;
+}
+.chatVideos .chatVideos-t .chatVideos-t-video {
+  width: 100%;
+  height: 100%;
+}
+.chatVideos .chatVideos-t .chatVideos-t-video video {
+  width: 100%;
+  height: 100%;
+}
+.chatVideos .chatVideos-b {
+  width: 100%;
+  height: 200px;
+  border-top: 1px solid #333;
+}
+.chatVideos .chatVideos-b .chatVideos-b-info {
+  width: 200px;
+  height: 100%;
+  display: inline-block;
+  vertical-align: top;
+}
+.chatVideos .chatVideos-b .chatVideos-b-video {
+  width: 200px;
+  height: 100%;
+  display: inline-block;
+  vertical-align: top;
+}
+.chatVideos .chatVideos-b .chatVideos-b-video video {
+  width: 100%;
+  height: 100%;
+}
+/*# sourceMappingURL=chatVideos.css.map */

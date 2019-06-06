@@ -4,6 +4,7 @@ import {connect} from 'react-redux'
 import {setTargetInfo, setChatWindow} from '../store/action'
 import store from '../store/index'
 import {$axios} from '../lib/interceptors'
+import ChatVideos from './chatVideos'
 import '../css/chatWindow.css'
 
 class chatWindow extends Component {
@@ -93,9 +94,7 @@ class chatWindow extends Component {
         // 销毁聊天窗口之前先修改目前（当前聊天好友）所有未读消息为已读
         const {targetInfo} = this.props
         if (targetInfo.id) {
-            let form = {}
-            form.targetid = targetInfo.id
-            $axios.post('/api/msgrecord/setRead', form)
+            $axios.post('/api/msgrecord/setRead', {targetid: targetInfo.id})
             this.refs.chatWindow.style.display = 'none'
             this.props.destroy(false)
         }
@@ -107,7 +106,6 @@ class chatWindow extends Component {
         let value = this.refs.chatWindowReply.innerHTML
         if (value) {
             socket.emit('CHAT_SEND', {
-                userid: user.uid, // 当前用户id
                 targetid: targetInfo.id, // 目标用户id
                 sid: socket.id // socketid
             }, value)
@@ -118,6 +116,7 @@ class chatWindow extends Component {
                 targetid: targetInfo.id,
                 content: value
             })
+            this.refs.chatWindowReply.innerHTML = ''
         }
     }
 
@@ -159,12 +158,34 @@ class chatWindow extends Component {
                         </div>
                     </div>
                     <div className='chatWindow-body-toolbar'>
-
+                        <ul>
+                            <li>
+                                <Icon type="meh" />
+                            </li>
+                            <li>
+                                <Icon type="folder" />
+                            </li>
+                            <li>
+                                <Icon type="scissor" />
+                            </li>
+                            <li>
+                                <Icon type="message" />
+                            </li>
+                            <li>
+                                <Icon type="phone" />
+                            </li>
+                            <li>
+                                <Icon type="video-camera" />
+                            </li>
+                        </ul>
                     </div>
                     <div className='chatWindow-body-reply' contentEditable='true' ref='chatWindowReply'></div>
                     <div className='chatWindow-body-btnBox'>
                         <Button size='small' type="primary" onClick={this.sendMessage.bind(this)}>发送</Button>
                     </div>
+                </div>
+                <div className='chatWindow-video'>
+                    <ChatVideos></ChatVideos>
                 </div>
             </div>
         )
