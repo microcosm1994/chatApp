@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import {Layout, Menu, Icon, Avatar, Dropdown } from 'antd'
+import {Layout, Menu, Icon, Avatar, Dropdown, message, Modal } from 'antd'
 import { Switch } from 'react-router-dom'
 import { renderRoutes } from 'react-router-config'
 import cookie from 'react-cookies'
@@ -7,7 +7,7 @@ import io from 'socket.io-client'
 import {$axios} from "../lib/interceptors";
 import {connect} from 'react-redux'
 // 引入action
-import {setUser, setSocket} from '../store/action'
+import {setUser, setSocket, setCandidate, setOffer, setTargetInfo, setASK} from '../store/action'
 import Friends from './friends'
 import ChatWindow from "./chatWindow";
 import '../css/home.css'
@@ -15,6 +15,7 @@ import '../css/home.css'
 const { Header, Sider, Content } = Layout
 const SubMenu = Menu.SubMenu;
 const MenuItemGroup = Menu.ItemGroup;
+const confirm = Modal.confirm;
 class Home extends Component{
     constructor (props) {
         super(props)
@@ -39,7 +40,8 @@ class Home extends Component{
             }
         })
         this.props.setSocket(socket) // 保存socket实例
-        this.recvMessage(socket)
+        this.recvMessage(socket) // 监听聊天信息
+        this.monitorAsk(socket) // 监听视频聊天请求
     }
     // 获取聊天窗口子组件
     onRef (name, ref) {
@@ -59,7 +61,9 @@ class Home extends Component{
         this.setState({
             isrender: state
         })
-        this.chatWindow = null
+        if (!state) {
+            this.chatWindow = null
+        }
     }
     // 接收消息
     recvMessage(socket) {
@@ -69,13 +73,58 @@ class Home extends Component{
                 if (this.chatWindow) {
                     this.chatWindow.updateView(res.data)
                 }
-                // 判断friends子组件实例和chatWindow子组件实例，如果chatWindow组件实例存在，则代表最新消息已经读过，不用更新未读消息数
+                // 判断friends子组件实例和chatWindow子组件实例，如果chatWindow组件实例不存在，则代表最新消息没有读过，需要更新未读消息数
                 if (this.friends && !this.chatWindow) {
                     // 更新子组件未读消息数
                     this.friends.setUnread(res.data.userid)
+                    // 提示
+                    message.info('您有一条新消息')
                 }
             }
         })
+    }
+    // 监听socket消息，获取视频通信交换信息
+    monitorAsk (socket) {
+        const self = this
+        // 监听socket消息，获取视频通信交换信息
+        socket.on('CHATVIDEO_ASK_RES', res => {
+            console.log(res);
+            const {setTargetInfo, setASK} = this.props
+            if (res.status === 200) {
+                $axios.post('/api/user/getuser', {id: res.data.userid}).then(user => {
+                    if (user.status === 200) {
+                        setTargetInfo(user.data)
+                        confirm({
+                            title: '请求视频通话',
+                            content: user.data.nickname + '请求h和您视频通话',
+                            onOk() {
+                                setASK(res.data.data)
+                                // 显示子组件
+                                self.setIsrender(true)
+                                // 开启子组件的视频组件（子组件的子组件）
+                                self.openChatVideo()
+                            },
+                            onCancel() {},
+                        })
+                    }
+                })
+            }
+        })
+    }
+    // 开启子组件的视频聊天组件
+    openChatVideo () {
+        if (this.chatWindow) {
+            // 调用子组件的方法
+            this.chatWindow.setState({
+                isRender: {
+                    chatVideo: true
+                }
+            })
+        } else {
+            setTimeout(() => {
+                this.openChatVideo()
+            }, 300)
+        }
     }
     handleClick = e => {
         let path = e.item.props.path
@@ -220,6 +269,18 @@ function mapDispatchToProps (dispatch, ownProps) {
         },
         setSocket (data) {
             dispatch(setSocket(data))
+        },
+        setASK (data) {
+            dispatch(setASK(data))
+        },
+        setCandidate (data) {
+            dispatch(setCandidate(data))
+        },
+        setOffer (data) {
+            dispatch(setOffer(data))
+        },
+        setTargetInfo (data) {
+            dispatch(setTargetInfo(data))
         }
     }
 }

@@ -5,12 +5,16 @@ import {setTargetInfo, setChatWindow} from '../store/action'
 import store from '../store/index'
 import {$axios} from '../lib/interceptors'
 import ChatVideos from './chatVideos'
+import ChatVideos1 from './chatVideos1'
 import '../css/chatWindow.css'
 
 class chatWindow extends Component {
     constructor(props) {
         super(props)
         this.state = {
+            isRender: {
+              chatVideo: false
+            },
             msgContent: []
         }
         // 监听state状态改变
@@ -138,9 +142,38 @@ class chatWindow extends Component {
         // 聊天界面滚动条一直保持在底部
         this.refs.msgContent.scrollTop = this.refs.msgContent.scrollHeight
     }
-
+    // 获取聊天窗口子组件
+    onRef (name, ref) {
+        switch (name) {
+            case 'chatVideo':
+                this.chatVideo = ref
+                break
+            default:
+                break
+        }
+    }
+    // 视频聊天
+    openVideo () {
+        this.setState({
+            isRender: {
+                chatVideo: true
+            }
+        })
+        this.childSendAsk()
+    }
+    // 调用子组件发送ask交换信息
+    childSendAsk () {
+        if (this.chatVideo) {
+            this.chatVideo.sendAsk()
+        } else {
+            setTimeout(() => {
+                this.childSendAsk()
+            }, 300)
+        }
+    }
     render() {
         const {uid} = this.props.user
+        const {id} = this.props.targetInfo
         return (
             <div className='chatWindow' ref='chatWindow'>
                 <div className='chatWindow-header' onMouseDown={this.drag.bind(this)}>
@@ -174,7 +207,7 @@ class chatWindow extends Component {
                             <li>
                                 <Icon type="phone" />
                             </li>
-                            <li>
+                            <li onClick={this.openVideo.bind(this)}>
                                 <Icon type="video-camera" />
                             </li>
                         </ul>
@@ -185,7 +218,12 @@ class chatWindow extends Component {
                     </div>
                 </div>
                 <div className='chatWindow-video'>
-                    <ChatVideos></ChatVideos>
+                    {/* this.state.isRender.chatVideo ? <ChatVideos1/> : null*/}
+                    {
+                        this.state.isRender.chatVideo ? <ChatVideos
+                            onRef={this.onRef.bind(this)}
+                        /> : null
+                    }
                 </div>
             </div>
         )

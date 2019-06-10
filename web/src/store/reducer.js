@@ -36,6 +36,38 @@ function chatWindow (state = defaultState.chatWindow, action) {
             return state
     }
 }
+function ASK (state = defaultState.ASK, action) {
+    switch (action.type) {
+        case 'SET_ASK':
+            return action.data
+        default:
+            return state
+    }
+}
+function candidate (state = defaultState.candidate, action) {
+    switch (action.type) {
+        case 'SET_CANDIDATE':
+            return action.data
+        default:
+            return state
+    }
+}
+function offer (state = defaultState.offer, action) {
+    switch (action.type) {
+        case 'SET_OFFER':
+            return action.data
+        default:
+            return state
+    }
+}
+function answer (state = defaultState.answer, action) {
+    switch (action.type) {
+        case 'SET_ANSWER':
+            return action.data
+        default:
+            return state
+    }
+}
 
 function infoList (state = defaultState.infoList, action) {
     switch (action.type) {
@@ -52,5 +84,9 @@ export default combineReducers({
     targetInfo,
     socket,
     chatWindow,
+    ASK,
+    candidate,
+    offer,
+    answer,
     infoList
 })

@@ -23,6 +23,9 @@ class User extends Controller {
         // 过期时间
         let time = 3600 * 24 * 30
         let {username, password} = ctx.request.body
+        // 获取域名
+        let referer = ctx.request.header.referer
+        let domin = referer.slice(referer.indexOf('//') + 2, referer.indexOf(':3000'))
         // 加密密码
         password = await ctx.service.utils.sha256(password, username)
         // 查询用户
@@ -34,13 +37,13 @@ class User extends Controller {
                 ctx.cookies.set('t', token,{
                     maxAge: time * 1000,
                     path: '/',
-                    domain: 'localhost',
+                    domain: domin,
                     httpOnly: false,
                 });
                 ctx.cookies.set('uid', data.id,{
                     maxAge: time * 1000,
                     path: '/',
-                    domain: 'localhost',
+                    domain: domin,
                     httpOnly: false,
                 });
                 // 保存token到redis
@@ -71,6 +74,22 @@ class User extends Controller {
         const {ctx} = this
         let form = ctx.request.body
         await ctx.service.user.findAll(form).then (async (data) => {
+            if (data) {
+                ctx.status = 200
+                ctx.body = data
+            } else {
+                ctx.status = 403
+                ctx.body = {
+                    error: '没有此用户'
+                }
+            }
+        })
+    }
+    // 查询一个用户
+    async getuser () {
+        const {ctx} = this
+        let form = ctx.request.body
+        await ctx.service.user.findOne(form).then (async (data) => {
             if (data) {
                 ctx.status = 200
                 ctx.body = data
