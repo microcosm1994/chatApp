@@ -99,6 +99,16 @@ class chatWindow extends Component {
         const {targetInfo} = this.props
         if (targetInfo.id) {
             $axios.post('/api/msgrecord/setRead', {targetid: targetInfo.id})
+            if (this.chatVideo) {
+                // 关闭视频聊天
+                this.chatVideo.close()
+                // 销毁视频聊天组件
+                this.setState({
+                    isRender: {
+                        chatVideo: false
+                    }
+                })
+            }
             this.refs.chatWindow.style.display = 'none'
             this.props.destroy(false)
         }

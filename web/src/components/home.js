@@ -88,7 +88,6 @@ class Home extends Component{
         const self = this
         // 监听socket消息，获取视频通信交换信息
         socket.on('CHATVIDEO_ASK_RES', res => {
-            console.log(res);
             const {setTargetInfo, setASK} = this.props
             if (res.status === 200) {
                 $axios.post('/api/user/getuser', {id: res.data.userid}).then(user => {

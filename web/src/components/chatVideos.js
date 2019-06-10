@@ -47,7 +47,7 @@ class chatVideos extends Component {
             // 保存视频流
             this.setState({localStream: stream})
             // 创建视频流发送方
-            this.ceeatePeerConnection(stream)
+            this.createPeerConnection(stream)
         })
             .catch(function (err) {
                 /* 处理error */
@@ -55,13 +55,27 @@ class chatVideos extends Component {
     }
 
     // 创建视频流发送方
-    ceeatePeerConnection(stream) {
+    createPeerConnection(stream) {
         let PeerConnection = window.RTCPeerConnection ||
             window.mozRTCPeerConnection ||
             window.webkitRTCPeerConnection;
+        this.setState({
+            sendpeer: null,
+            recvpeer: null
+        })
         let sendPc = new RTCPeerConnection()
         let recvPc = new RTCPeerConnection()
-        sendPc.addStream(stream)
+        stream.getTracks().forEach(item => {
+            sendPc.addTrack(item, stream)
+        })
+        let sendChannel = sendPc.createDataChannel('msg', {})
+        sendChannel.onopen = function (e) {
+            console.log(e);
+            sendChannel.send('sendChannel_recv')
+        }
+        sendChannel.onmessage = function (e) {
+            console.log(e);
+        }
         // 创建信令
         sendPc.onicecandidate = (e) => {
             if (e.candidate) {
@@ -73,10 +87,9 @@ class chatVideos extends Component {
         }
         // 监听从对方过来的媒体流
         recvPc.onaddstream = (e) => {
-            console.log(e.stream);
             let tVideo = this.refs.tVideo
-            // tVideo.srcObject = e.stream
-            tVideo.src = window.URL.createObjectURL(e.stream)
+            tVideo.srcObject = e.stream
+            // tVideo.src = window.URL.createObjectURL(e.stream)
         }
         sendPc.createOffer().then(offer => {
             // 保存offer
@@ -90,6 +103,12 @@ class chatVideos extends Component {
             sendpeer: sendPc,
             recvpeer: recvPc
         })
+    }
+
+    // 创建数据通道
+    createPeerDataChannel (peer, label) {
+        let sendChannel = peer.createDataChannel(label, {})
+        console.log(sendChannel);
     }
 
     // 等待ASK
@@ -115,6 +134,13 @@ class chatVideos extends Component {
                 })
             })
             this.sendAnswer()
+            recvpeer.ondatachannel = function(e) {
+                let sendChannel = e.channel
+                sendChannel.onmessage = (e) => {
+                    console.log(e.data);
+                }
+                console.log(e)
+            }
         } else {
             setTimeout(() => {
                 this.onASK(ASK)
@@ -166,7 +192,7 @@ class chatVideos extends Component {
     onRecvAnswer(socket) {
         // 监听socket消息，获取Answer
         socket.on('CHATVIDEO_RECV_ANSWER_RES', res => {
-            let {sendpeer} = this.state
+            let {sendpeer, recvpeer} = this.state
             if (res.status === 200) {
                 sendpeer.setRemoteDescription(res.data.data.answer)
                 sendpeer.addIceCandidate(res.data.data.candidate)
@@ -256,12 +282,23 @@ class chatVideos extends Component {
         }
     }
 
+    // 关闭视频聊天
+    close () {
+        let {sendpeer, recvpeer} = this.state
+        sendpeer.close()
+        recvpeer.close()
+        this.setState({
+            sendpeer: null,
+            recvpeer: null
+        })
+    }
+
     render() {
         return (
             <div className='chatVideos'>
                 <div className='chatVideos-t'>
                     <div className='chatVideos-t-video'>
-                        <video autoPlay controls ref='tVideo'></video>
+                        <video autoPlay ref='tVideo'></video>
                     </div>
                 </div>
                 <div className='chatVideos-b'>
