@@ -39,12 +39,11 @@ class chat extends Controller {
         const { ctx, app } = this;
         const usocket = app.usocket.getState()
         let info = ctx.args[0]
-        const uid = ctx.cookies.get('uid')
         // 广播
         // app.io.emit('CHAT_RES', message)
         let result = {}
         result.data = {
-            userid: uid,
+            userid: info.userid,
             createtime: Date.now(),
             targetid: info.targetid
         }
@@ -60,12 +59,11 @@ class chat extends Controller {
         const usocket = app.usocket.getState()
         let info = ctx.args[0]
         const message = ctx.args[1];
-        const uid = ctx.cookies.get('uid')
         // 广播
         // app.io.emit('CHAT_RES', message)
         let result = {}
         result.data = {
-            userid: uid,
+            userid: info.userid,
             createtime: Date.now(),
             targetid: info.targetid,
             data: message
@@ -118,6 +116,25 @@ class chat extends Controller {
         if (usocket[info.targetid]) {
             result.status = 200
             await usocket[info.targetid].emit('CHATVIDEO_ANSWER', result)
+        }
+    }
+    // 关闭视频聊天
+    async videoClose () {
+        const { ctx, app } = this;
+        const usocket = app.usocket.getState()
+        let info = ctx.args[0]
+        let result = {}
+        result.data = {
+            userid: info.userid,
+            createtime: Date.now(),
+            targetid: info.targetid,
+            data: 'close'
+        }
+        // await usocket[uid].emit('CHATVIDEO_ANSWER_RES', result)
+        // 使用用户的socket实例发送消息
+        if (usocket[info.targetid]) {
+            result.status = 200
+            await usocket[info.targetid].emit('CHATVIDEO_CLOSE', result)
         }
     }
 }

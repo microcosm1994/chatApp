@@ -209,7 +209,7 @@ class chatWindow extends Component {
     closeChatVideo () {
         let {socket} = this.props
         // 关闭视频聊天
-        this.chatVideo.close()
+        this.chatVideo.close('send')
         socket.removeListener('CHATVIDEO_RES')
         this.setState({
             isRender: {
@@ -267,6 +267,7 @@ class chatWindow extends Component {
                     {
                         this.state.isRender.chatVideo ? <ChatVideos
                             onRef={this.onRef.bind(this)}
+                            chatWindow={this}
                         /> : null
                     }
                 </div>

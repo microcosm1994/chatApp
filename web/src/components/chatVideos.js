@@ -3,17 +3,17 @@ import '../css/chatVideos.css'
 import {setCandidate, setOffer} from "../store/action";
 import connect from "react-redux/es/connect/connect";
 
+let sendPc = null
+let recvPc = null
 class chatVideos extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            sendpeer: null,
-            recvpeer: null,
             localStream: null,
             askCandidate: null,
             askOffer: null,
+            answer: null,
             answerCandidate: null,
-            answerOffer: null,
         }
     }
 
@@ -26,6 +26,7 @@ class chatVideos extends Component {
         if (this.props.socket) {
             this.onASK(this.props.socket)
             this.onAnswer(this.props.socket)
+            this.onClose(this.props.socket)
         }
     }
 
@@ -56,12 +57,8 @@ class chatVideos extends Component {
         let PeerConnection = window.RTCPeerConnection ||
             window.mozRTCPeerConnection ||
             window.webkitRTCPeerConnection;
-        this.setState({
-            sendpeer: null,
-            recvpeer: null
-        })
-        let sendPc = new RTCPeerConnection()
-        let recvPc = new RTCPeerConnection()
+        sendPc = new RTCPeerConnection()
+        recvPc = new RTCPeerConnection()
         stream.getTracks().forEach(item => {
             sendPc.addTrack(item, stream)
         })
@@ -83,9 +80,15 @@ class chatVideos extends Component {
         }
         // 监听从对方过来的媒体流
         recvPc.onaddstream = (e) => {
-            let tVideo = this.refs.tVideo
-            tVideo.srcObject = e.stream
-            // tVideo.src = window.URL.createObjectURL(e.stream)
+            if (e.stream) {
+                let tVideo = this.refs.tVideo
+                console.log(e.stream);
+                console.log(window.URL.createObjectURL(e.stream));
+                tVideo.srcObject = e.stream
+            }
+            // e.stream.getTracks().forEach(item => {
+            //     recvPc.addTrack(item, e.stream)
+            // })
         }
         sendPc.createOffer().then(offer => {
             // 保存offer
@@ -94,34 +97,28 @@ class chatVideos extends Component {
             })
             sendPc.setLocalDescription(offer)
         })
-        // 保存发送者实例
-        this.setState({
-            sendpeer: sendPc,
-            recvpeer: recvPc
-        })
     }
     // 创建offer
     createOffer (res) {
-        let {sendpeer, recvpeer} = this.state
-        if (sendpeer && recvpeer) {
-            recvpeer.setRemoteDescription(res.data.data.offer)
-            recvpeer.addIceCandidate(res.data.data.candidate)
-            recvpeer.onicecandidate = (e) => {
+        if (recvPc) {
+            recvPc.setRemoteDescription(res.data.data.offer)
+            recvPc.addIceCandidate(res.data.data.candidate)
+            recvPc.onicecandidate = (e) => {
                 if (e.candidate) {
-                    // 保存answer
+                    // 保存信令
                     this.setState({
                         answerCandidate: e.candidate
                     })
                 }
             }
-            recvpeer.createAnswer().then(res => {
-                recvpeer.setLocalDescription(res)
+            recvPc.createAnswer().then(answer => {
+                recvPc.setLocalDescription(answer)
                 // 保存answer
                 this.setState({
-                    answerOffer: res
+                    answer: answer
                 })
             })
-            recvpeer.ondatachannel = function(e) {
+            recvPc.ondatachannel = function(e) {
                 let sendChannel = e.channel
                 sendChannel.onmessage = (e) => {
                     console.log(e.data);
@@ -156,10 +153,9 @@ class chatVideos extends Component {
     onAnswer(socket) {
         // 监听socket消息，获取Answer
         socket.on('CHATVIDEO_ANSWER', res => {
-            let {sendpeer} = this.state
             if (res.status === 200) {
-                sendpeer.setRemoteDescription(res.data.data.answer)
-                sendpeer.addIceCandidate(res.data.data.candidate)
+                sendPc.setRemoteDescription(res.data.data.answer)
+                sendPc.addIceCandidate(res.data.data.answerCandidate)
             }
         })
     }
@@ -167,10 +163,9 @@ class chatVideos extends Component {
     // 发送信令
     sendAsk(type) {
         const {socket, targetInfo, user} = this.props
-        let ask = {
-            candidate: this.state.askCandidate,
-            offer: this.state.askOffer,
-        }
+        let ask = {}
+        ask.candidate = this.state.askCandidate
+        ask.offer = this.state.askOffer
         if (ask.candidate && ask.offer) {
             socket.emit('CHATVIDEO_ASK', {
                 userid: user.uid, // 目标用户id
@@ -187,11 +182,10 @@ class chatVideos extends Component {
     // 发送应答
     sendAnswer(type) {
         const {socket, targetInfo, user} = this.props
-        let answer = {
-            answer: this.state.answerOffer,
-            candidate: this.state.answerCandidate
-        }
-        if (answer.candidate && answer.answer) {
+        let answer = {}
+        answer.answer = this.state.answer
+        answer.answerCandidate = this.state.answerCandidate
+        if (answer.answer && answer.answerCandidate) {
             socket.emit('CHATVIDEO_ANSWER', {
                 userid: user.uid, // 目标用户id
                 targetid: targetInfo.id, // 目标用户id
@@ -205,24 +199,44 @@ class chatVideos extends Component {
     }
 
     // 关闭视频聊天
-    close () {
-        let {sendpeer, recvpeer} = this.state
-        let {socket} = this.props
-        sendpeer.close()
-        recvpeer.close()
+    close (type) {
+        let {socket, user, targetInfo} = this.props
+        if (type === 'send') {
+            // 给对方发送关闭信息
+            socket.emit('CHATVIDEO_CLOSE', {
+                userid: user.uid, // 目标用户id
+                targetid: targetInfo.id // 目标用户id
+            })
+        }
+        if (sendPc && recvPc) {
+            sendPc.close()
+            recvPc.close()
+        }
+        sendPc = null
+        recvPc = null
         // 删除全部信息
         this.setState({
-            sendpeer: null,
-            recvpeer: null,
             localStream: null,
             askCandidate: null,
             askOffer: null,
-            answerCandidate: null,
-            answerOffer: null,
+            answer: null,
         })
         // 清除socket监听
         socket.removeListener('CHATVIDEO_ASK')
         socket.removeListener('CHATVIDEO_ANSWER')
+        this.props.chatWindow.setState({
+            isRender: {
+                chatVideo: false
+            }
+        })
+        this.props.chatWindow.chatVideo = null
+    }
+    onClose (socket) {
+        socket.on('CHATVIDEO_CLOSE', res => {
+            if (res.status === 200) {
+                this.close('recv')
+            }
+        })
     }
 
     render() {

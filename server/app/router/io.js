@@ -5,4 +5,5 @@ module.exports = app => {
     io.of('/').route('CHATVIDEO_RES', io.controller.chat.videoRes)
     io.of('/').route('CHATVIDEO_ASK', io.controller.chat.videoAsk)
     io.of('/').route('CHATVIDEO_ANSWER', io.controller.chat.videoAnswer)
+    io.of('/').route('CHATVIDEO_CLOSE', io.controller.chat.videoClose)
 }
