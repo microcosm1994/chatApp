@@ -83,27 +83,36 @@ class Home extends Component{
             }
         })
     }
-    // 监听socket消息，获取视频通信交换信息
+    // 监听socket消息
     monitorAsk (socket) {
         const self = this
-        // 监听socket消息，获取视频通信交换信息
-        socket.on('CHATVIDEO_ASK_RES', res => {
-            const {setTargetInfo, setASK} = this.props
+        const uid = this.props.user.uid
+        // 监听socket消息
+        socket.on('CHATVIDEO_REQ', res => {
+            const {setTargetInfo} = this.props
             if (res.status === 200) {
                 $axios.post('/api/user/getuser', {id: res.data.userid}).then(user => {
                     if (user.status === 200) {
                         setTargetInfo(user.data)
                         confirm({
                             title: '请求视频通话',
-                            content: user.data.nickname + '请求h和您视频通话',
+                            content: user.data.nickname + '请求和您视频通话',
                             onOk() {
-                                setASK(res.data.data)
                                 // 显示子组件
                                 self.setIsrender(true)
                                 // 开启子组件的视频组件（子组件的子组件）
-                                self.openChatVideo()
+                                self.openChatVideo(socket)
+                                // 等待视频聊天子组件渲染后返回视频请求的应答
+                                self.onchatVideo(socket, user.data)
                             },
-                            onCancel() {},
+                            onCancel() {
+                                // 发送视频请求的应答
+                                socket.emit('CHATVIDEO_RES', {
+                                    userid: uid, // 用户id
+                                    targetid: user.data.id, // 目标用户id
+                                    sid: socket.id // socketid
+                                }, 'cancel')
+                            },
                         })
                     }
                 })
@@ -122,6 +131,20 @@ class Home extends Component{
         } else {
             setTimeout(() => {
                 this.openChatVideo()
+            }, 300)
+        }
+    }
+    onchatVideo (socket, targetInfo) {
+        const uid = this.props.user.uid
+        if (this.chatWindow && this.chatWindow.chatVideo) {
+            socket.emit('CHATVIDEO_RES', {
+                userid: uid, // 用户id
+                targetid: targetInfo.id, // 目标用户id
+                sid: socket.id // socketid
+            }, 'ok')
+        }else {
+            setTimeout(() => {
+                this.onchatVideo(socket, targetInfo)
             }, 300)
         }
     }

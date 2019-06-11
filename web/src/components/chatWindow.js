@@ -1,6 +1,7 @@
 import React, {Component} from 'react'
-import {Button, Icon, Avatar} from 'antd'
+import {Button, Icon, Avatar, message} from 'antd'
 import {connect} from 'react-redux'
+import cookie from 'react-cookies'
 import {setTargetInfo, setChatWindow} from '../store/action'
 import store from '../store/index'
 import {$axios} from '../lib/interceptors'
@@ -96,18 +97,12 @@ class chatWindow extends Component {
     // 关闭聊天窗口
     close() {
         // 销毁聊天窗口之前先修改目前（当前聊天好友）所有未读消息为已读
-        const {targetInfo} = this.props
+        const {socket, targetInfo} = this.props
         if (targetInfo.id) {
             $axios.post('/api/msgrecord/setRead', {targetid: targetInfo.id})
+            // 如果视频聊天子组件已经渲染，就销毁
             if (this.chatVideo) {
-                // 关闭视频聊天
-                this.chatVideo.close()
-                // 销毁视频聊天组件
-                this.setState({
-                    isRender: {
-                        chatVideo: false
-                    }
-                })
+                this.closeChatVideo()
             }
             this.refs.chatWindow.style.display = 'none'
             this.props.destroy(false)
@@ -164,26 +159,66 @@ class chatWindow extends Component {
     }
     // 视频聊天
     openVideo () {
+        // 先发送视频请求，等待对方同意后进行连接
+        const {socket, user, targetInfo} = this.props
+        socket.emit('CHATVIDEO_REQ', {
+            userid: user.uid, // 用户id
+            targetid: targetInfo.id, // 目标用户id
+            sid: socket.id // socketid
+        })
+        // 渲染聊天窗口子组件，开始等待回复
         this.setState({
             isRender: {
                 chatVideo: true
             }
         })
-        this.childSendAsk()
+        // 开始监听对方回复
+        this.onVideo()
+    }
+    // 监听视频聊天回应
+    onVideo () {
+        const {socket} = this.props
+        socket.on('CHATVIDEO_RES', res => {
+            // 同意后开始调用子组件方法开始进行信息交换
+            if (res.status === 200) {
+                switch (res.data.data) {
+                    case 'ok':
+                        // 对方同意视频，那就调用子组件发送ASK信息
+                        this.childSendAsk()
+                        break
+                    case 'cancel':
+                        message.info('对方拒绝了你的视频聊天请求')
+                        // 对方不同意视频，那就销毁视频聊天子组件
+                        this.closeChatVideo()
+                        break
+                }
+            }
+        })
     }
     // 调用子组件发送ask交换信息
     childSendAsk () {
         if (this.chatVideo) {
-            this.chatVideo.sendAsk()
+            this.chatVideo.sendAsk('send')
         } else {
             setTimeout(() => {
                 this.childSendAsk()
             }, 300)
         }
     }
+    // 销毁视频聊天子组件
+    closeChatVideo () {
+        let {socket} = this.props
+        // 关闭视频聊天
+        this.chatVideo.close()
+        socket.removeListener('CHATVIDEO_RES')
+        this.setState({
+            isRender: {
+                chatVideo: false
+            }
+        })
+    }
     render() {
         const {uid} = this.props.user
-        const {id} = this.props.targetInfo
         return (
             <div className='chatWindow' ref='chatWindow'>
                 <div className='chatWindow-header' onMouseDown={this.drag.bind(this)}>
