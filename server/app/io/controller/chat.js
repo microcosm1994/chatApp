@@ -75,7 +75,30 @@ class chat extends Controller {
         }
     }
     // 交换offer、candidate等建立连接所需的信息
-    async videoAsk () {
+    async videoIce () {
+        const { ctx, app } = this;
+        const usocket = app.usocket.getState()
+        let info = ctx.args[0]
+        // 信令
+        const Ice = ctx.args[1];
+        let result = {}
+        result.data = {
+            userid: info.userid,
+            createtime: Date.now(),
+            targetid: info.targetid,
+            type: info.type,
+            data: Ice //信令
+        }
+        result.status = 200
+        // await usocket[uid].emit('CHATVIDEO_ASK_RES', result)
+        // 使用用户的socket实例发送消息
+        if (usocket[info.targetid]) {
+            result.status = 200
+            await usocket[info.targetid].emit('CHATVIDEO_ICE', result)
+        }
+    }
+    // 交换offer、candidate等建立连接所需的信息
+    async videoOffer () {
         const { ctx, app } = this;
         const usocket = app.usocket.getState()
         let info = ctx.args[0]
@@ -94,7 +117,7 @@ class chat extends Controller {
         // 使用用户的socket实例发送消息
         if (usocket[info.targetid]) {
             result.status = 200
-            await usocket[info.targetid].emit('CHATVIDEO_ASK', result)
+            await usocket[info.targetid].emit('CHATVIDEO_OFFER', result)
         }
     }
     async videoAnswer () {
@@ -108,7 +131,6 @@ class chat extends Controller {
             userid: info.userid,
             createtime: Date.now(),
             targetid: info.targetid,
-            type: info.type,
             data: answer //信令
         }
         // await usocket[uid].emit('CHATVIDEO_ANSWER_RES', result)

@@ -166,12 +166,6 @@ class chatWindow extends Component {
             targetid: targetInfo.id, // 目标用户id
             sid: socket.id // socketid
         })
-        // 渲染聊天窗口子组件，开始等待回复
-        this.setState({
-            isRender: {
-                chatVideo: true
-            }
-        })
         // 开始监听对方回复
         this.onVideo()
     }
@@ -183,8 +177,12 @@ class chatWindow extends Component {
             if (res.status === 200) {
                 switch (res.data.data) {
                     case 'ok':
-                        // 对方同意视频，那就调用子组件发送ASK信息
-                        this.childSendAsk()
+                        // 对方同意视频，那就调用子组件发送ASK信息// 渲染聊天窗口子组件，开始等待回复
+                        this.setState({
+                            isRender: {
+                                chatVideo: true
+                            }
+                        })
                         break
                     case 'cancel':
                         message.info('对方拒绝了你的视频聊天请求')
@@ -194,16 +192,6 @@ class chatWindow extends Component {
                 }
             }
         })
-    }
-    // 调用子组件发送ask交换信息
-    childSendAsk () {
-        if (this.chatVideo) {
-            this.chatVideo.sendAsk('send')
-        } else {
-            setTimeout(() => {
-                this.childSendAsk()
-            }, 300)
-        }
     }
     // 销毁视频聊天子组件
     closeChatVideo () {
