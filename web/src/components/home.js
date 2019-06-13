@@ -7,7 +7,7 @@ import io from 'socket.io-client'
 import {$axios} from "../lib/interceptors";
 import {connect} from 'react-redux'
 // 引入action
-import {setUser, setSocket, setCandidate, setOffer, setTargetInfo, setASK} from '../store/action'
+import {setUser, setSocket, setTargetInfo} from '../store/action'
 import Friends from './friends'
 import ChatWindow from "./chatWindow";
 import '../css/home.css'
@@ -102,7 +102,7 @@ class Home extends Component{
                                 self.setIsrender(true)
                                 // 开启子组件的视频组件（子组件的子组件）
                                 self.openChatVideo(socket)
-                                // 等待视频聊天子组件渲染后返回视频请求的应答
+                                // 等待视频聊天子组件渲染后开始交换ice信息
                                 self.onchatVideo(socket, user.data)
                             },
                             onCancel() {
@@ -131,7 +131,16 @@ class Home extends Component{
         } else {
             setTimeout(() => {
                 this.openChatVideo()
-            }, 300)
+            }, 100)
+        }
+    }
+    startChatVideo () {
+        if (this.chatWindow.chatVideo) {
+            this.chatWindow.chatVideo.createPeerConnection()
+        } else {
+            setTimeout(() => {
+                this.startChatVideo()
+            }, 100)
         }
     }
     onchatVideo (socket, targetInfo) {
@@ -142,10 +151,11 @@ class Home extends Component{
                 targetid: targetInfo.id, // 目标用户id
                 sid: socket.id // socketid
             }, 'ok')
+            this.startChatVideo()
         }else {
             setTimeout(() => {
                 this.onchatVideo(socket, targetInfo)
-            }, 300)
+            }, 100)
         }
     }
     handleClick = e => {
@@ -291,15 +301,6 @@ function mapDispatchToProps (dispatch, ownProps) {
         },
         setSocket (data) {
             dispatch(setSocket(data))
-        },
-        setASK (data) {
-            dispatch(setASK(data))
-        },
-        setCandidate (data) {
-            dispatch(setCandidate(data))
-        },
-        setOffer (data) {
-            dispatch(setOffer(data))
         },
         setTargetInfo (data) {
             dispatch(setTargetInfo(data))

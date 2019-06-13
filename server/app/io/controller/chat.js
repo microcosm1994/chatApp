@@ -8,12 +8,12 @@ class chat extends Controller {
         const usocket = app.usocket.getState()
         let info = ctx.args[0]
         const message = ctx.args[1];
-        const uid = ctx.cookies.get('uid')
         // 广播
         // app.io.emit('CHAT_RES', message)
         let result = {}
+        console.log(message);
         result.data = {
-            userid: uid,
+            userid: info.userid,
             createtime: Date.now(),
             targetid: info.targetid,
             content: message

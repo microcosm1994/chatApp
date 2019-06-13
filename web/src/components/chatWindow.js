@@ -1,12 +1,11 @@
 import React, {Component} from 'react'
+import ReactDom from 'react-dom'
 import {Button, Icon, Avatar, message} from 'antd'
 import {connect} from 'react-redux'
-import cookie from 'react-cookies'
 import {setTargetInfo, setChatWindow} from '../store/action'
 import store from '../store/index'
 import {$axios} from '../lib/interceptors'
 import ChatVideos from './chatVideos'
-import ChatVideos1 from './chatVideos1'
 import '../css/chatWindow.css'
 
 class chatWindow extends Component {
@@ -14,7 +13,7 @@ class chatWindow extends Component {
         super(props)
         this.state = {
             isRender: {
-              chatVideo: false
+                chatVideo: false
             },
             msgContent: []
         }
@@ -115,9 +114,11 @@ class chatWindow extends Component {
         let value = this.refs.chatWindowReply.innerHTML
         if (value) {
             socket.emit('CHAT_SEND', {
+                userid: user.uid, // 目标用户id
                 targetid: targetInfo.id, // 目标用户id
                 sid: socket.id // socketid
             }, value)
+            console.log(value);
             // 更新视图
             this.updateView({
                 createtime: Date.now().toLocaleString(),
@@ -147,8 +148,9 @@ class chatWindow extends Component {
         // 聊天界面滚动条一直保持在底部
         this.refs.msgContent.scrollTop = this.refs.msgContent.scrollHeight
     }
+
     // 获取聊天窗口子组件
-    onRef (name, ref) {
+    onRef(name, ref) {
         switch (name) {
             case 'chatVideo':
                 this.chatVideo = ref
@@ -157,8 +159,9 @@ class chatWindow extends Component {
                 break
         }
     }
+
     // 视频聊天
-    openVideo () {
+    openVideo() {
         // 先发送视频请求，等待对方同意后进行连接
         const {socket, user, targetInfo} = this.props
         socket.emit('CHATVIDEO_REQ', {
@@ -166,23 +169,26 @@ class chatWindow extends Component {
             targetid: targetInfo.id, // 目标用户id
             sid: socket.id // socketid
         })
+        // 渲染聊天窗口子组件，开始等待回复
+        this.setState({
+            isRender: {
+                chatVideo: true
+            }
+        })
         // 开始监听对方回复
         this.onVideo()
     }
+
     // 监听视频聊天回应
-    onVideo () {
+    onVideo() {
         const {socket} = this.props
         socket.on('CHATVIDEO_RES', res => {
             // 同意后开始调用子组件方法开始进行信息交换
             if (res.status === 200) {
                 switch (res.data.data) {
                     case 'ok':
-                        // 对方同意视频，那就调用子组件发送ASK信息// 渲染聊天窗口子组件，开始等待回复
-                        this.setState({
-                            isRender: {
-                                chatVideo: true
-                            }
-                        })
+                        // 对方同意视频，那就调用子组件发送ASK信息
+                        this.startChatVideo()
                         break
                     case 'cancel':
                         message.info('对方拒绝了你的视频聊天请求')
@@ -193,8 +199,19 @@ class chatWindow extends Component {
             }
         })
     }
+
+    startChatVideo() {
+        if (this.chatVideo) {
+            this.chatVideo.createPeerConnection()
+        } else {
+            setTimeout(() => {
+                this.startChatVideo()
+            }, 100)
+        }
+    }
+
     // 销毁视频聊天子组件
-    closeChatVideo () {
+    closeChatVideo() {
         let {socket} = this.props
         // 关闭视频聊天
         this.chatVideo.close('send')
@@ -205,6 +222,43 @@ class chatWindow extends Component {
             }
         })
     }
+
+    // 拖放事件
+    dropHandler(e) {
+        e.preventDefault()
+        let fileList = e.dataTransfer.files
+        if (fileList.length > 0) {
+            for (let i = 0; i < fileList.length; i++) {
+                this.readFile(fileList[i])
+            }
+        }
+    }
+
+    // 拖放事件,获取放置的文件
+    dragoverHandler(e) {
+        e.preventDefault()
+    }
+
+    // 生成img图片DOM
+    createImg(result) {
+        let container = this.refs.chatWindowReply
+        let img = <img src={result} style={{width:'100px'}} alt=""/>
+        ReactDom.render(img, container)
+    }
+
+    // 读取文件
+    readFile(file) {
+        let read = new FileReader()
+        read.onload = (ev) => {
+            if (read.readyState === 2) {
+                if (file.type === 'image/jpeg') {
+                    this.createImg(read.result)
+                }
+            }
+        }
+        read.readAsDataURL(file)
+    }
+
     render() {
         const {uid} = this.props.user
         return (
@@ -226,26 +280,27 @@ class chatWindow extends Component {
                     <div className='chatWindow-body-toolbar'>
                         <ul>
                             <li>
-                                <Icon type="meh" />
+                                <Icon type="meh"/>
                             </li>
                             <li>
-                                <Icon type="folder" />
+                                <Icon type="folder"/>
                             </li>
                             <li>
-                                <Icon type="scissor" />
+                                <Icon type="scissor"/>
                             </li>
                             <li>
-                                <Icon type="message" />
+                                <Icon type="message"/>
                             </li>
                             <li>
-                                <Icon type="phone" />
+                                <Icon type="phone"/>
                             </li>
                             <li onClick={this.openVideo.bind(this)}>
-                                <Icon type="video-camera" />
+                                <Icon type="video-camera"/>
                             </li>
                         </ul>
                     </div>
-                    <div className='chatWindow-body-reply' contentEditable='true' ref='chatWindowReply'></div>
+                    <div className='chatWindow-body-reply' contentEditable='true' ref='chatWindowReply'
+                         onDrop={this.dropHandler.bind(this)} onDragOver={this.dragoverHandler.bind(this)}></div>
                     <div className='chatWindow-body-btnBox'>
                         <Button size='small' type="primary" onClick={this.sendMessage.bind(this)}>发送</Button>
                     </div>
