@@ -72,7 +72,11 @@ module.exports = appInfo => {
                 packetMiddleware: [],
             },
         },
-    };
+    }
+    // 文件上传白名单扩展
+    config.multipart = {
+        fileExtensions: [ '.txt' ] // 增加对 apk 扩展名的文件支持
+    }
     // add your user config here
     const userConfig = {
         // myAppName: 'egg',

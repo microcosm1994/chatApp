@@ -228,9 +228,18 @@ class chatWindow extends Component {
         e.preventDefault()
         let fileList = e.dataTransfer.files
         if (fileList.length > 0) {
+            let formData = new FormData()
             for (let i = 0; i < fileList.length; i++) {
-                this.readFile(fileList[i])
+                formData.append('attachment', fileList[i])
             }
+            $axios.post('/api/file/save', formData).then(res => {
+                if (res.status === 200) {
+                    console.log(res);
+                    res.data.data.forEach(item => {
+                        this.createImg(item)
+                    })
+                }
+            })
         }
     }
 
@@ -242,8 +251,8 @@ class chatWindow extends Component {
     // 生成img图片DOM
     createImg(result) {
         let container = this.refs.chatWindowReply
-        let img = <img src={result} style={{width:'100px'}} alt=""/>
-        ReactDom.render(img, container)
+        let html = <div dangerouslySetInnerHTML={{__html: container.innerHTML + '<img src=" '+ result + '" style="width:100px" alt=""/>'}}></div>
+        ReactDom.render(html, container)
     }
 
     // 读取文件
