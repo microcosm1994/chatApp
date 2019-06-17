@@ -113,19 +113,63 @@ class chatWindow extends Component {
         const {socket, user, targetInfo} = this.props
         let value = this.refs.chatWindowReply.innerHTML
         if (value) {
-            socket.emit('CHAT_SEND', {
-                userid: user.uid, // 目标用户id
-                targetid: targetInfo.id, // 目标用户id
-                sid: socket.id // socketid
-            }, value)
-            console.log(value);
-            // 更新视图
-            this.updateView({
-                createtime: Date.now().toLocaleString(),
-                userid: user.uid,
-                targetid: targetInfo.id,
-                content: value
-            })
+            // 字符串转dom对象，方便后续操作
+            let parser = new DOMParser()
+            let doc = parser.parseFromString(value, 'text/html')
+            // 获取当前dom中的所有文件
+            let fileList = doc.getElementsByTagName('img')
+            if (fileList.length > 0) {
+                // 如果消息中夹杂着文件，需要逐条发送消息
+                let container = doc.getElementsByClassName('reply-content')[0]
+                while (fileList.length > 0) {
+                    let tmpNode = document.createElement('div')
+                    // 深拷贝当前要发送的dom对象
+                    let d = fileList[0].cloneNode(true)
+                    // dom对象转字符串
+                    tmpNode.appendChild(d)
+                    socket.emit('CHAT_SEND', {
+                        userid: user.uid, // 目标用户id
+                        targetid: targetInfo.id, // 目标用户id
+                        sid: socket.id // socketid
+                    }, tmpNode.innerHTML)
+                    // 移除当前已经发送的dom对象
+                    container.removeChild(fileList[0])
+                    // 更新视图
+                    this.updateView({
+                        createtime: Date.now().toLocaleString(),
+                        userid: user.uid,
+                        targetid: targetInfo.id,
+                        content: tmpNode.innerHTML
+                    })
+                }
+                // 发送文字
+                socket.emit('CHAT_SEND', {
+                    userid: user.uid, // 目标用户id
+                    targetid: targetInfo.id, // 目标用户id
+                    sid: socket.id // socketid
+                }, container.innerHTML)
+                // 更新视图
+                this.updateView({
+                    createtime: Date.now().toLocaleString(),
+                    userid: user.uid,
+                    targetid: targetInfo.id,
+                    content: container.innerHTML
+                })
+            } else {
+                // 如果没有文件，则直接发送
+                socket.emit('CHAT_SEND', {
+                    userid: user.uid, // 目标用户id
+                    targetid: targetInfo.id, // 目标用户id
+                    sid: socket.id // socketid
+                }, value)
+                // 更新视图
+                this.updateView({
+                    createtime: Date.now().toLocaleString(),
+                    userid: user.uid,
+                    targetid: targetInfo.id,
+                    content: value
+                })
+            }
             this.refs.chatWindowReply.innerHTML = ''
         }
     }
@@ -229,15 +273,13 @@ class chatWindow extends Component {
         let fileList = e.dataTransfer.files
         if (fileList.length > 0) {
             let formData = new FormData()
+            formData.set('length', fileList.length)
             for (let i = 0; i < fileList.length; i++) {
                 formData.append('attachment', fileList[i])
             }
             $axios.post('/api/file/save', formData).then(res => {
                 if (res.status === 200) {
-                    console.log(res);
-                    res.data.data.forEach(item => {
-                        this.createImg(item)
-                    })
+                    this.createImg(res.data.data)
                 }
             })
         }
@@ -249,9 +291,13 @@ class chatWindow extends Component {
     }
 
     // 生成img图片DOM
-    createImg(result) {
+    createImg(data) {
+        let img = ''
+        data.forEach(item => {
+            img += '<img data-path="'+ item.path +'" src="'+ item.cover + '" style="width:100px" alt=""/>'
+        })
         let container = this.refs.chatWindowReply
-        let html = <div dangerouslySetInnerHTML={{__html: container.innerHTML + '<img src=" '+ result + '" style="width:100px" alt=""/>'}}></div>
+        let html = <div className='reply-content' dangerouslySetInnerHTML={{__html: container.innerHTML + '' + img}}></div>
         ReactDom.render(html, container)
     }
 
