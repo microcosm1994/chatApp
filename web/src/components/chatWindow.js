@@ -117,44 +117,67 @@ class chatWindow extends Component {
             let parser = new DOMParser()
             let doc = parser.parseFromString(value, 'text/html')
             // 获取当前dom中的所有文件
-            let fileList = doc.getElementsByTagName('img')
+            let fileList = doc.getElementsByClassName('chat-file')
             if (fileList.length > 0) {
                 // 如果消息中夹杂着文件，需要逐条发送消息
                 let container = doc.getElementsByClassName('reply-content')[0]
-                while (fileList.length > 0) {
-                    let tmpNode = document.createElement('div')
-                    // 深拷贝当前要发送的dom对象
-                    let d = fileList[0].cloneNode(true)
-                    // dom对象转字符串
-                    tmpNode.appendChild(d)
-                    socket.emit('CHAT_SEND', {
-                        userid: user.uid, // 目标用户id
-                        targetid: targetInfo.id, // 目标用户id
-                        sid: socket.id // socketid
-                    }, tmpNode.innerHTML)
-                    // 移除当前已经发送的dom对象
-                    container.removeChild(fileList[0])
-                    // 更新视图
-                    this.updateView({
-                        createtime: Date.now().toLocaleString(),
-                        userid: user.uid,
-                        targetid: targetInfo.id,
-                        content: tmpNode.innerHTML
-                    })
+                let nodeList = container.childNodes
+                for (let i = 0; i < nodeList.length; i++) {
+                    switch (nodeList[i].nodeName) {
+                        case 'IMG':
+                            // 创建一个元素
+                            let imgNode = document.createElement('div')
+                            // 深拷贝当前要发送的dom对象
+                            let imgDeepNode = nodeList[i].cloneNode(true)
+                            // dom对象转字符串
+                            imgNode.appendChild(imgDeepNode)
+                            // 发送文件
+                            socket.emit('CHAT_SEND', {
+                                userid: user.uid, // 目标用户id
+                                targetid: targetInfo.id, // 目标用户id
+                                sid: socket.id // socketid
+                            }, imgNode.innerHTML)
+                            // 更新视图
+                            this.updateView({
+                                createtime: Date.now().toLocaleString(),
+                                userid: user.uid,
+                                targetid: targetInfo.id,
+                                content: imgNode.innerHTML
+                            })
+                            break
+                        case '#text':
+                            socket.emit('CHAT_SEND', {
+                                userid: user.uid, // 目标用户id
+                                targetid: targetInfo.id, // 目标用户id
+                                sid: socket.id // socketid
+                            }, nodeList[i].nodeValue)
+                            // 更新视图
+                            this.updateView({
+                                createtime: Date.now().toLocaleString(),
+                                userid: user.uid,
+                                targetid: targetInfo.id,
+                                content: nodeList[i].nodeValue
+                            })
+                            break
+                        case 'DIV':
+                            let divNode = document.createElement('div')
+                            let divDeepNode = nodeList[i].cloneNode(true)
+                            divNode.appendChild(divDeepNode)
+                            socket.emit('CHAT_SEND', {
+                                userid: user.uid, // 目标用户id
+                                targetid: targetInfo.id, // 目标用户id
+                                sid: socket.id // socketid
+                            }, divNode.innerHTML)
+                            // 更新视图
+                            this.updateView({
+                                createtime: Date.now().toLocaleString(),
+                                userid: user.uid,
+                                targetid: targetInfo.id,
+                                content: divNode.innerHTML
+                            })
+                            break
+                    }
                 }
-                // 发送文字
-                socket.emit('CHAT_SEND', {
-                    userid: user.uid, // 目标用户id
-                    targetid: targetInfo.id, // 目标用户id
-                    sid: socket.id // socketid
-                }, container.innerHTML)
-                // 更新视图
-                this.updateView({
-                    createtime: Date.now().toLocaleString(),
-                    userid: user.uid,
-                    targetid: targetInfo.id,
-                    content: container.innerHTML
-                })
             } else {
                 // 如果没有文件，则直接发送
                 socket.emit('CHAT_SEND', {
@@ -294,11 +317,16 @@ class chatWindow extends Component {
     createImg(data) {
         let img = ''
         data.forEach(item => {
-            img += '<img data-path="'+ item.path +'" src="'+ item.cover + '" style="width:100px" alt=""/>'
+            img += '<img class="chat-file" data-path="'+ item.path +'" src="'+ item.cover + '" alt=""/>'
         })
         let container = this.refs.chatWindowReply
-        let html = <div className='reply-content' dangerouslySetInnerHTML={{__html: container.innerHTML + '' + img}}></div>
-        ReactDom.render(html, container)
+        if (container.children.length > 0) {
+            if (container.children[0].className === 'reply-content') {
+                container.innerHTML = container.children[0].innerHTML
+            }
+        }
+        let html = `<div class="reply-content">${container.innerHTML}${img}</div>`
+        container.innerHTML = html
     }
 
     // 读取文件
@@ -312,6 +340,18 @@ class chatWindow extends Component {
             }
         }
         read.readAsDataURL(file)
+    }
+
+    // 监听键盘事件
+    keyDown (e) {
+        switch (e.keyCode) {
+            case 13:
+                e.preventDefault()
+                this.sendMessage()
+                break
+            default:
+                break
+        }
     }
 
     render() {
@@ -355,13 +395,12 @@ class chatWindow extends Component {
                         </ul>
                     </div>
                     <div className='chatWindow-body-reply' contentEditable='true' ref='chatWindowReply'
-                         onDrop={this.dropHandler.bind(this)} onDragOver={this.dragoverHandler.bind(this)}></div>
+                         onDrop={this.dropHandler.bind(this)} onDragOver={this.dragoverHandler.bind(this)} onKeyDown={this.keyDown.bind(this)}></div>
                     <div className='chatWindow-body-btnBox'>
                         <Button size='small' type="primary" onClick={this.sendMessage.bind(this)}>发送</Button>
                     </div>
                 </div>
                 <div className='chatWindow-video'>
-                    {/* this.state.isRender.chatVideo ? <ChatVideos1/> : null*/}
                     {
                         this.state.isRender.chatVideo ? <ChatVideos
                             onRef={this.onRef.bind(this)}
