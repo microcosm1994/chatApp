@@ -156,7 +156,7 @@
   width: 670px;
   height: 80px;
   margin: 0 auto;
-  background: #fff;
+  background: #f5f5f5;
   text-align: left;
   padding: 10px;
   overflow: auto;
@@ -172,7 +172,25 @@
   vertical-align: top;
 }
 .chat-file {
+  display: block;
+  width: 200px;
+  box-shadow: inset #999999 0px 0px 4px;
+  padding: 5px 10px;
+  background: #fff;
+}
+.chat-file .chat-img {
+  width: 100%;
+  display: block;
+}
+.chat-file .chat-file-name {
+  width: 120px;
   display: inline-block;
-  width: 60px;
+  vertical-align: middle;
+  word-break: break-all;
+  line-height: 20px;
+}
+.chat-file .chat-file-img {
+  width: 50px;
+  margin-left: 10px;
 }
 /*# sourceMappingURL=chatWindow.css.map */

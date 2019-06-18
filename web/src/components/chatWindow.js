@@ -122,27 +122,29 @@ class chatWindow extends Component {
                 // 如果消息中夹杂着文件，需要逐条发送消息
                 let container = doc.getElementsByClassName('reply-content')[0]
                 let nodeList = container.childNodes
+                console.log(nodeList);
                 for (let i = 0; i < nodeList.length; i++) {
+                    console.log(nodeList[i].nodeName);
                     switch (nodeList[i].nodeName) {
-                        case 'IMG':
+                        case 'SPAN':
                             // 创建一个元素
-                            let imgNode = document.createElement('div')
+                            let fileNode = document.createElement('div')
                             // 深拷贝当前要发送的dom对象
-                            let imgDeepNode = nodeList[i].cloneNode(true)
+                            let fileDeepNode = nodeList[i].cloneNode(true)
                             // dom对象转字符串
-                            imgNode.appendChild(imgDeepNode)
+                            fileNode.appendChild(fileDeepNode)
                             // 发送文件
                             socket.emit('CHAT_SEND', {
                                 userid: user.uid, // 目标用户id
                                 targetid: targetInfo.id, // 目标用户id
                                 sid: socket.id // socketid
-                            }, imgNode.innerHTML)
+                            }, fileNode.innerHTML)
                             // 更新视图
                             this.updateView({
                                 createtime: Date.now().toLocaleString(),
                                 userid: user.uid,
                                 targetid: targetInfo.id,
-                                content: imgNode.innerHTML
+                                content: fileNode.innerHTML
                             })
                             break
                         case '#text':
@@ -315,9 +317,13 @@ class chatWindow extends Component {
 
     // 生成img图片DOM
     createImg(data) {
-        let img = ''
+        let fileHtml = ''
         data.forEach(item => {
-            img += '<img class="chat-file" data-path="'+ item.path +'" src="'+ item.cover + '" alt=""/>'
+            if (item.type === 'image/jpeg') {
+                fileHtml += '<span class="chat-file"><img class="chat-img" data-path="'+ item.path +'" src="'+ item.cover + '" alt=""/></span>'
+            } else {
+                fileHtml += '<span class="chat-file"><span class="chat-file-name">' + item.name + '</span><img class="chat-file-img" data-path="'+ item.path +'" src="'+ item.cover + '" alt=""/></span>'
+            }
         })
         let container = this.refs.chatWindowReply
         if (container.children.length > 0) {
@@ -325,7 +331,7 @@ class chatWindow extends Component {
                 container.innerHTML = container.children[0].innerHTML
             }
         }
-        let html = `<div class="reply-content">${container.innerHTML}${img}</div>`
+        let html = `<div class="reply-content">${container.innerHTML}${fileHtml}</div>`
         container.innerHTML = html
     }
 
