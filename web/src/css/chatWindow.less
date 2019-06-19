@@ -49,7 +49,7 @@
       margin: 0 auto;
       overflow: hidden;
       .chatWindow-body-chat{
-        width: 103%;
+        width: 102%;
         padding-bottom: 150px;
         height: 400px;
         overflow: auto;
@@ -97,6 +97,14 @@
                   text-align: left;
                   padding: 2px 5px;
                   border-radius: 4px;
+                }
+                .msgContent-container-file-box{
+                  width: 100%;
+                  min-height: 30px;
+                  text-align: left;
+                  padding: 2px 5px;
+                  border-radius: 4px;
+                  cursor: pointer;
                 }
               }
             }
@@ -179,7 +187,6 @@
   display: block;
   width: 200px;
   box-shadow: inset #999999 0px 0px 4px;
-  padding: 5px 10px;
   background: #fff;
   .chat-img{
     width: 100%;
@@ -190,7 +197,8 @@
     display: inline-block;
     vertical-align: middle;
     word-break: break-all;
-    line-height: 20px;
+    line-height: 16px;
+    padding-left: 10px;
   }
   .chat-file-img{
     width: 50px;

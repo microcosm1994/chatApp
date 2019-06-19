@@ -126,7 +126,10 @@ class chatWindow extends Component {
     sendMessage() {
         const {socket, user, targetInfo} = this.props
         let value = this.refs.chatWindowReply.innerHTML
+        // 获取消息数据的id
+        let msgId = this.state.msgContent[this.state.msgContent.length - 1].id + 1
         if (value) {
+            console.log(value);
             // 字符串转dom对象，方便后续操作
             let parser = new DOMParser()
             let doc = parser.parseFromString(value, 'text/html')
@@ -136,9 +139,11 @@ class chatWindow extends Component {
                 // 如果消息中夹杂着文件，需要逐条发送消息
                 let container = doc.getElementsByClassName('reply-content')[0]
                 let nodeList = container.childNodes
+                console.log(nodeList);
                 for (let i = 0; i < nodeList.length; i++) {
+                    msgId += i
                     switch (nodeList[i].nodeName) {
-                        case 'SPAN':
+                        case 'A':
                             // 创建一个元素
                             let fileNode = document.createElement('div')
                             // 深拷贝当前要发送的dom对象
@@ -158,7 +163,8 @@ class chatWindow extends Component {
                                 userid: user.uid,
                                 targetid: targetInfo.id,
                                 content: fileNode.innerHTML,
-                                type: 'file'
+                                type: 'file',
+                                id: msgId
                             })
                             break
                         case '#text':
@@ -174,7 +180,8 @@ class chatWindow extends Component {
                                 userid: user.uid,
                                 targetid: targetInfo.id,
                                 content: nodeList[i].nodeValue,
-                                type: 'message'
+                                type: 'message',
+                                id: msgId
                             })
                             break
                         case 'DIV':
@@ -193,7 +200,8 @@ class chatWindow extends Component {
                                 userid: user.uid,
                                 targetid: targetInfo.id,
                                 content: divNode.innerHTML,
-                                type: 'message'
+                                type: 'message',
+                                id: msgId
                             })
                             break
                     }
@@ -212,7 +220,8 @@ class chatWindow extends Component {
                     userid: user.uid,
                     targetid: targetInfo.id,
                     type: 'message',
-                    content: value
+                    content: value,
+                    id: msgId
                 })
             }
             this.refs.chatWindowReply.innerHTML = ''
@@ -221,23 +230,29 @@ class chatWindow extends Component {
 
     // 更新页面视图
     updateView(data) {
+        console.log(data);
         let type = Object.prototype.toString.call(data)
-        let lastId = data[data.length - 1].id
-        console.log(lastId);
+        let lastId = null
         switch (type) {
             case '[object Array]':
                 this.state.msgContent = [...data, ...this.state.msgContent]
+                lastId = data[data.length - 1].id
                 break
             default:
                 this.state.msgContent.push(data)
+                lastId = data.id
                 break
         }
-        console.log(this.state.msgContent);
         // 更新视图
         this.setState({
             msgContent: this.state.msgContent
         })
-        let top = document.getElementById(lastId).offsetTop
+        // 使用id找到最后一条消息的位置，让滚动条定位到这个位置
+        let lastMsgDom = document.getElementById(lastId)
+        let top = this.refs.msgContent.scrollHeight
+        if (lastMsgDom) {
+            top = lastMsgDom.offsetTop
+        }
         // 聊天界面滚动条一直保持在底部
         this.refs.msgContent.scrollTop = top
     }
@@ -325,13 +340,26 @@ class chatWindow extends Component {
             let formData = new FormData()
             formData.set('length', fileList.length)
             for (let i = 0; i < fileList.length; i++) {
-                formData.append('attachment', fileList[i])
-            }
-            $axios.post('/api/file/save', formData).then(res => {
-                if (res.status === 200) {
-                    this.createImg(res.data.data)
+                // console.log(fileList[i].name.indexOf(' '))
+                // console.log(/\s/.test(fileList[i].name))
+                // 检测文件名有没有空格
+                if (fileList[i].name.indexOf(' ') > -1) {
+                    message.error(fileList[i].name + '文件名称不能包含空格。')
+                    return false
                 }
-            })
+                if (fileList[i].size / 1024 < 5000) {
+                    formData.append('attachment', fileList[i])
+                } else {
+                    message.error(fileList[i].name + '超过5M，无法发送文件。')
+                }
+            }
+            if (formData.getAll('attachment').length > 0) {
+                $axios.post('/api/file/save', formData).then(res => {
+                    if (res.status === 200) {
+                        this.createImg(res.data.data)
+                    }
+                })
+            }
         }
     }
 
@@ -345,9 +373,9 @@ class chatWindow extends Component {
         let fileHtml = ''
         data.forEach(item => {
             if (item.type === 'image/jpeg') {
-                fileHtml += '<span class="chat-file"><img class="chat-img" data-path="'+ item.path +'" src="'+ item.cover + '" alt=""/></span>'
+                fileHtml += '<a href="' + item.path + '" download="'+ item.name +'" target="_blank"><span class="chat-file"><img class="chat-img" src="'+ item.cover + '" alt=""/></span></a>'
             } else {
-                fileHtml += '<span class="chat-file"><span class="chat-file-name">' + item.name + '</span><img class="chat-file-img" data-path="'+ item.path +'" src="'+ item.cover + '" alt=""/></span>'
+                fileHtml += '<a href="' + item.path + '" download="'+ item.name +'" target="_blank"><span class="chat-file"><span class="chat-file-name">' + item.name + '</span><img class="chat-file-img" src="'+ item.cover + '" alt=""/></span></a>'
             }
         })
         let container = this.refs.chatWindowReply
@@ -473,7 +501,7 @@ function MsgContent(props) {
                     <Avatar src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"/>
                 </div>
                 <div className='msgContent-container-content'>
-                    <div className='msgContent-container-content-box'
+                    <div className={item.type === 'message' ? 'msgContent-container-content-box' : 'msgContent-container-file-box'}
                          dangerouslySetInnerHTML={{__html: item.content}}></div>
                 </div>
             </div>

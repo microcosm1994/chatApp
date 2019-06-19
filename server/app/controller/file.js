@@ -25,7 +25,7 @@ class file extends Controller{
                 let writable = fs.createWriteStream(filePath)// 创建写入流
                 await part.pipe(writable)
                 file.cover = fileIcon(part.mimeType, 'http://localhost:7001/public/upload/' + part.filename)
-                file.path = filePath
+                file.path = 'http://localhost:7001/public/upload/' + part.filename
                 result.push(file)
             }
         }
