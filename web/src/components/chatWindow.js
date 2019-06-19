@@ -1,12 +1,14 @@
 import React, {Component} from 'react'
-import ReactDom from 'react-dom'
-import {Button, Icon, Avatar, message, Popconfirm} from 'antd'
+import {Button, Icon, Avatar, message, Popover} from 'antd'
 import {connect} from 'react-redux'
 import {setTargetInfo, setChatWindow} from '../store/action'
 import store from '../store/index'
 import {$axios} from '../lib/interceptors'
 import ChatVideos from './chatVideos'
+import Emoji from './emoji'
 import '../css/chatWindow.css'
+import '../css/emoji.css'
+import '../iconFont/iconfont.css'
 
 class chatWindow extends Component {
     constructor(props) {
@@ -19,7 +21,8 @@ class chatWindow extends Component {
             msgPage: {
                 offset: 0,
                 limit: 5
-            }
+            },
+            visible: false
         }
         // 监听state状态改变
         store.subscribe(() => {
@@ -129,7 +132,6 @@ class chatWindow extends Component {
         // 获取消息数据的id
         let msgId = this.state.msgContent[this.state.msgContent.length - 1].id + 1
         if (value) {
-            console.log(value);
             // 字符串转dom对象，方便后续操作
             let parser = new DOMParser()
             let doc = parser.parseFromString(value, 'text/html')
@@ -139,7 +141,6 @@ class chatWindow extends Component {
                 // 如果消息中夹杂着文件，需要逐条发送消息
                 let container = doc.getElementsByClassName('reply-content')[0]
                 let nodeList = container.childNodes
-                console.log(nodeList);
                 for (let i = 0; i < nodeList.length; i++) {
                     msgId += i
                     switch (nodeList[i].nodeName) {
@@ -420,6 +421,14 @@ class chatWindow extends Component {
         }
     }
 
+    // 表情包
+    handleVisibleChange = visible => {
+        this.setState({ visible });
+    }
+    hide () {
+        this.setState({visible: false})
+    }
+
     render() {
         const {uid} = this.props.user
         return (
@@ -441,7 +450,14 @@ class chatWindow extends Component {
                     <div className='chatWindow-body-toolbar'>
                         <ul>
                             <li>
-                                <Icon type="meh"/>
+                                <Popover
+                                    content={this.state.visible ? <Emoji input={this.refs.chatWindowReply}></Emoji> : null}
+                                    trigger="click"
+                                    visible={this.state.visible}
+                                    onVisibleChange={this.handleVisibleChange}
+                                >
+                                    <Icon type="meh"/>
+                                </Popover>
                             </li>
                             <li>
                                 <Icon type="folder"/>
