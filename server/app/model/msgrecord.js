@@ -21,7 +21,8 @@ module.exports = app => {
         delete: {
             type: INTEGER,
             defaultValue: 0
-        }
+        },
+        type: STRING,
     }, {
         timestamps: false
     })

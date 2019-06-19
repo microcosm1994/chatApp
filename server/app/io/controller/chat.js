@@ -11,12 +11,12 @@ class chat extends Controller {
         // 广播
         // app.io.emit('CHAT_RES', message)
         let result = {}
-        console.log(message);
         result.data = {
             userid: info.userid,
             createtime: Date.now(),
             targetid: info.targetid,
-            content: message
+            content: message,
+            type: info.type // 消息类型：message；file：文件;
         }
         await ctx.service.msgrecord.create(result.data).then(async res => {
             if (res) {

@@ -10,8 +10,10 @@ class msgrecord extends Service{
         const {app, ctx} = this;
         const {Op} = app.Sequelize
         return await ctx.model.Msgrecord.findAll({
+            offset: obj.offset,
+            limit: obj.limit,
             order: [
-                ['createtime', 'asc']
+                ['createtime', 'DESC']
             ],
             where: {
                 [Op.or]: [

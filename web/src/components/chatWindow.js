@@ -1,6 +1,6 @@
 import React, {Component} from 'react'
 import ReactDom from 'react-dom'
-import {Button, Icon, Avatar, message} from 'antd'
+import {Button, Icon, Avatar, message, Popconfirm} from 'antd'
 import {connect} from 'react-redux'
 import {setTargetInfo, setChatWindow} from '../store/action'
 import store from '../store/index'
@@ -15,7 +15,11 @@ class chatWindow extends Component {
             isRender: {
                 chatVideo: false
             },
-            msgContent: []
+            msgContent: [],
+            msgPage: {
+                offset: 0,
+                limit: 5
+            }
         }
         // 监听state状态改变
         store.subscribe(() => {
@@ -36,19 +40,29 @@ class chatWindow extends Component {
 
     componentWillReceiveProps(nextProps) {
         if (nextProps.targetInfo.id) {
-            this.get(nextProps)
+            this.get(nextProps, this.state.msgPage.offset, this.state.msgPage.limit)
         }
     }
 
     // 获取聊天数据
-    get(props) {
+    get(props, offset, limit) {
         const {user, targetInfo} = props
         if (user.uid && targetInfo.id) {
             let form = {}
             form.userid = user.uid
             form.targetid = targetInfo.id
+            form.offset = offset
+            form.limit = limit
             $axios.post('/api/msgrecord/get', form).then(res => {
-                this.updateView(res.data)
+                if (res.status === 200) {
+                    this.setState({
+                        msgPage: {
+                            offset: offset,
+                            limit: limit
+                        }
+                    })
+                    this.updateView(res.data)
+                }
             })
         }
     }
@@ -122,9 +136,7 @@ class chatWindow extends Component {
                 // 如果消息中夹杂着文件，需要逐条发送消息
                 let container = doc.getElementsByClassName('reply-content')[0]
                 let nodeList = container.childNodes
-                console.log(nodeList);
                 for (let i = 0; i < nodeList.length; i++) {
-                    console.log(nodeList[i].nodeName);
                     switch (nodeList[i].nodeName) {
                         case 'SPAN':
                             // 创建一个元素
@@ -137,6 +149,7 @@ class chatWindow extends Component {
                             socket.emit('CHAT_SEND', {
                                 userid: user.uid, // 目标用户id
                                 targetid: targetInfo.id, // 目标用户id
+                                type: 'file', // 目标用户id
                                 sid: socket.id // socketid
                             }, fileNode.innerHTML)
                             // 更新视图
@@ -144,13 +157,15 @@ class chatWindow extends Component {
                                 createtime: Date.now().toLocaleString(),
                                 userid: user.uid,
                                 targetid: targetInfo.id,
-                                content: fileNode.innerHTML
+                                content: fileNode.innerHTML,
+                                type: 'file'
                             })
                             break
                         case '#text':
                             socket.emit('CHAT_SEND', {
                                 userid: user.uid, // 目标用户id
                                 targetid: targetInfo.id, // 目标用户id
+                                type: 'message', // 目标用户id
                                 sid: socket.id // socketid
                             }, nodeList[i].nodeValue)
                             // 更新视图
@@ -158,7 +173,8 @@ class chatWindow extends Component {
                                 createtime: Date.now().toLocaleString(),
                                 userid: user.uid,
                                 targetid: targetInfo.id,
-                                content: nodeList[i].nodeValue
+                                content: nodeList[i].nodeValue,
+                                type: 'message'
                             })
                             break
                         case 'DIV':
@@ -168,6 +184,7 @@ class chatWindow extends Component {
                             socket.emit('CHAT_SEND', {
                                 userid: user.uid, // 目标用户id
                                 targetid: targetInfo.id, // 目标用户id
+                                type: 'message', // 目标用户id
                                 sid: socket.id // socketid
                             }, divNode.innerHTML)
                             // 更新视图
@@ -175,7 +192,8 @@ class chatWindow extends Component {
                                 createtime: Date.now().toLocaleString(),
                                 userid: user.uid,
                                 targetid: targetInfo.id,
-                                content: divNode.innerHTML
+                                content: divNode.innerHTML,
+                                type: 'message'
                             })
                             break
                     }
@@ -185,6 +203,7 @@ class chatWindow extends Component {
                 socket.emit('CHAT_SEND', {
                     userid: user.uid, // 目标用户id
                     targetid: targetInfo.id, // 目标用户id
+                    type: 'message', // 目标用户id
                     sid: socket.id // socketid
                 }, value)
                 // 更新视图
@@ -192,6 +211,7 @@ class chatWindow extends Component {
                     createtime: Date.now().toLocaleString(),
                     userid: user.uid,
                     targetid: targetInfo.id,
+                    type: 'message',
                     content: value
                 })
             }
@@ -202,20 +222,24 @@ class chatWindow extends Component {
     // 更新页面视图
     updateView(data) {
         let type = Object.prototype.toString.call(data)
+        let lastId = data[data.length - 1].id
+        console.log(lastId);
         switch (type) {
             case '[object Array]':
-                this.state.msgContent = data
+                this.state.msgContent = [...data, ...this.state.msgContent]
                 break
             default:
                 this.state.msgContent.push(data)
                 break
         }
+        console.log(this.state.msgContent);
         // 更新视图
         this.setState({
             msgContent: this.state.msgContent
         })
+        let top = document.getElementById(lastId).offsetTop
         // 聊天界面滚动条一直保持在底部
-        this.refs.msgContent.scrollTop = this.refs.msgContent.scrollHeight
+        this.refs.msgContent.scrollTop = top
     }
 
     // 获取聊天窗口子组件
@@ -269,6 +293,7 @@ class chatWindow extends Component {
         })
     }
 
+    // 开始视频聊天
     startChatVideo() {
         if (this.chatVideo) {
             this.chatVideo.createPeerConnection()
@@ -360,6 +385,13 @@ class chatWindow extends Component {
         }
     }
 
+    // 监听页面滚动，获取历史聊天记录
+    chatRecord (e) {
+        if (!e.target.scrollTop) {
+            this.get(this.props, this.state.msgPage.offset + this.state.msgPage.limit, this.state.msgPage.limit)
+        }
+    }
+
     render() {
         const {uid} = this.props.user
         return (
@@ -374,7 +406,7 @@ class chatWindow extends Component {
                 </div>
                 <div className='chatWindow-body'>
                     <div className='chatWindow-body-chat-box'>
-                        <div className='chatWindow-body-chat' ref='msgContent'>
+                        <div className='chatWindow-body-chat' ref='msgContent' onScroll={this.chatRecord.bind(this)}>
                             <MsgContent uid={uid} data={this.state.msgContent}/>
                         </div>
                     </div>
@@ -430,7 +462,7 @@ function MsgContent(props) {
             direction.float = 'right'
             contentName = 'direction-right'
         }
-        return (<div className='msgContent' key={index}>
+        return (<div id={item.id} className='msgContent' key={index}>
             <div className='msgContent-time'>
                 <span className='msgContent-time-span'>
                     {item.createtime}

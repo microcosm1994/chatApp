@@ -25,7 +25,7 @@ class MsgRecord extends Controller{
             if (data) {
                 await ctx.service.msgrecord.setRead(form)
                 ctx.status = 200
-                ctx.body = data
+                ctx.body = data.reverse()
             } else {
                 ctx.status = 403
                 ctx.body = {
