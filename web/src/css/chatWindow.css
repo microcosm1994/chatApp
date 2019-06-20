@@ -169,6 +169,16 @@
   padding: 10px;
   overflow: auto;
 }
+.chatWindow .chatWindow-body .chatWindow-body-reply .reply-content {
+  display: inline-block;
+  width: auto;
+  max-width: max-content;
+}
+.chatWindow .chatWindow-body .chatWindow-body-reply .reply-content a {
+  display: inline-block;
+  width: auto;
+  max-width: max-content;
+}
 .chatWindow .chatWindow-body .chatWindow-body-btnBox {
   width: 670px;
   margin: 5px auto;

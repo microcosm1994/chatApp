@@ -8,7 +8,6 @@ import ChatVideos from './chatVideos'
 import Emoji from './emoji'
 import '../css/chatWindow.css'
 import '../css/emoji.css'
-import '../iconFont/iconfont.css'
 
 class chatWindow extends Component {
     constructor(props) {
@@ -22,7 +21,8 @@ class chatWindow extends Component {
                 offset: 0,
                 limit: 5
             },
-            visible: false
+            visible: false,
+            range: null
         }
         // 监听state状态改变
         store.subscribe(() => {
@@ -231,7 +231,6 @@ class chatWindow extends Component {
 
     // 更新页面视图
     updateView(data) {
-        console.log(data);
         let type = Object.prototype.toString.call(data)
         let lastId = null
         switch (type) {
@@ -374,9 +373,9 @@ class chatWindow extends Component {
         let fileHtml = ''
         data.forEach(item => {
             if (item.type === 'image/jpeg') {
-                fileHtml += '<a href="' + item.path + '" download="'+ item.name +'" target="_blank"><span class="chat-file"><img class="chat-img" src="'+ item.cover + '" alt=""/></span></a>'
+                fileHtml += '<a href="' + item.path + '" download="'+ item.name +'" target="_blank"  contentEditable="false"><span class="chat-file"><img class="chat-img" src="'+ item.cover + '" alt=""/></span></a>'
             } else {
-                fileHtml += '<a href="' + item.path + '" download="'+ item.name +'" target="_blank"><span class="chat-file"><span class="chat-file-name">' + item.name + '</span><img class="chat-file-img" src="'+ item.cover + '" alt=""/></span></a>'
+                fileHtml += '<a href="' + item.path + '" download="'+ item.name +'" target="_blank" contentEditable="false"><span class="chat-file"><span class="chat-file-name">' + item.name + '</span><img class="chat-file-img" src="'+ item.cover + '" alt=""/></span></a>'
             }
         })
         let container = this.refs.chatWindowReply
@@ -385,7 +384,7 @@ class chatWindow extends Component {
                 container.innerHTML = container.children[0].innerHTML
             }
         }
-        let html = `<div class="reply-content">${container.innerHTML}${fileHtml}</div>`
+        let html = `<span class="reply-content">${container.innerHTML}${fileHtml}</span>`
         container.innerHTML = html
     }
 
@@ -421,12 +420,22 @@ class chatWindow extends Component {
         }
     }
 
-    // 表情包
+    // 表情
     handleVisibleChange = visible => {
         this.setState({ visible });
     }
+
     hide () {
         this.setState({visible: false})
+    }
+
+    // 获取光标位置
+    getPosition () {
+        let selection = window.getSelection()
+        let range = selection.getRangeAt(0)
+        this.setState({
+            range: range
+        })
     }
 
     render() {
@@ -451,7 +460,7 @@ class chatWindow extends Component {
                         <ul>
                             <li>
                                 <Popover
-                                    content={this.state.visible ? <Emoji input={this.refs.chatWindowReply}></Emoji> : null}
+                                    content={this.state.visible ? <Emoji input={this.refs.chatWindowReply} range={this.state.range}></Emoji> : null}
                                     trigger="click"
                                     visible={this.state.visible}
                                     onVisibleChange={this.handleVisibleChange}
@@ -477,7 +486,7 @@ class chatWindow extends Component {
                         </ul>
                     </div>
                     <div className='chatWindow-body-reply' contentEditable='true' ref='chatWindowReply'
-                         onDrop={this.dropHandler.bind(this)} onDragOver={this.dragoverHandler.bind(this)} onKeyDown={this.keyDown.bind(this)}></div>
+                         onDrop={this.dropHandler.bind(this)} onDragOver={this.dragoverHandler.bind(this)} onKeyDown={this.keyDown.bind(this)} onBlur={this.getPosition.bind(this)}></div>
                     <div className='chatWindow-body-btnBox'>
                         <Button size='small' type="primary" onClick={this.sendMessage.bind(this)}>发送</Button>
                     </div>

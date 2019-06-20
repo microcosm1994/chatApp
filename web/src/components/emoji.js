@@ -1,7 +1,8 @@
 import React, {Component} from 'react'
 import '../css/emoji.css'
-import '../iconFont/iconfont.css'
 
+const requireContext = require.context('../img', true, /^\.\/.*\.svg$/)
+const images = requireContext.keys().map(requireContext)
 class emoji extends Component{
     constructor (props) {
         super(props)
@@ -16,31 +17,33 @@ class emoji extends Component{
     }
     // 显示表情
     iconFont() {
-        let html = ''
         for (let i = 0; i < 36; i++) {
-            // html += '<span class="iconfont icon-Expression_' + i + '"></span>'
-            html += '<svg class="icon" aria-hidden="true"><use xlink:href="#icon-Expression_' + (i === 0 ? '' : i) + '"></use></svg>'
+            let img = document.createElement("img")
+            img.src = images[i]
+            img.className = 'icon'
+            document.getElementsByClassName('emoji-box')[0].appendChild(img)
         }
-        document.getElementsByClassName('emoji-box')[0].innerHTML = html
     }
 
     // 给表情添加监听事件
     addEvent () {
-        console.log(this.refs.emoji.childNodes);
         let nodeList = this.refs.emoji.childNodes
         for (let i = 0; i < nodeList.length; i++) {
             nodeList[i].addEventListener('click', (e) => {
                 let deepNode = nodeList[i].cloneNode(true)
-                this.props.input.appendChild(deepNode)
+                let selection = window.getSelection()
+                let range = this.props.range
+                if (!range) {
+                    range = document.createRange()
+                    range.selectNodeContents(this.props.input)
+                }
+                range.setStart(range.endContainer, range.endOffset)
+                range.insertNode(deepNode)
+                range.setEnd(range.endContainer, range.endOffset)
+                selection.selectAllChildren(this.props.input)
+                selection.collapseToEnd()
             })
         }
-    }
-
-    // 发送表情
-    sendEmoji (e) {
-        console.log(e.target);
-        console.log(this.props.input);
-        this.props.input.appendChild(e.target)
     }
 
     render () {

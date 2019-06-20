@@ -1,1 +1,1 @@
-{"version":3,"sources":["emoji.less"],"names":[],"mappings":"AAAA;EACE,kBAAA;EACA,gBAAA;EACA,WAAA;EACA,YAAA;EACA,eAAA;EACA,iBAAA;EACA,eAAA;;AAEF;EACE,YAAA;;AAEE,UADF,MACG;EACC,mBAAA;;AAEF,UAJF,MAIG;EACC,gBAAA","file":"emoji.css"}
+{"version":3,"sources":["emoji.less"],"names":[],"mappings":"AAAA;EACE,gBAAA;EACA,WAAA;EACA,YAAA;EACA,eAAA;EACA,eAAA;;AAEF;EACE,YAAA;;AADF,UAEE;EACE,gBAAA;EACA,WAAA;EACA,YAAA;EACA,eAAA;EACA,iBAAA;EACA,eAAA;;AACA,UAPF,MAOG;EACC,mBAAA;;AAEF,UAVF,MAUG;EACC,gBAAA","file":"emoji.css"}

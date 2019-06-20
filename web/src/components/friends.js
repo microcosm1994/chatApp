@@ -1,9 +1,9 @@
 import React, {Component} from 'react'
-import ReactDOM from 'react-dom'
 import {Icon, Avatar, Tabs, Input, List, message, Badge } from 'antd'
 import {$axios} from "../lib/interceptors";
 import '../css/friends.css'
 import {connect} from 'react-redux'
+import avator from '../img/avator.jpg'
 // 引入action
 import {setTargetInfo} from '../store/action'
 
@@ -22,6 +22,7 @@ class friends extends Component{
         }
     }
     componentDidMount () {
+        console.log(avator);
         this.getFriends()
         this.props.onRef('friends', this)
     }
@@ -212,7 +213,7 @@ class friends extends Component{
                 <div className='friends-smallWindow' ref='friendsSmallWindow'>
                     <div className='friends-smallWindow-info'>
                         <div className='friends-smallWindow-info-avator'>
-                            <Avatar size="small" src='../img/avator.jpg' />
+                            <Avatar size="small" src={avator} />
                         </div>
                         <div className='friends-smallWindow-info-name'>
                             小宇宙
