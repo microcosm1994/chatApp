@@ -6,6 +6,7 @@ import cookie from 'react-cookies'
 import io from 'socket.io-client'
 import {$axios} from "../lib/interceptors";
 import {connect} from 'react-redux'
+import avator from '../img/avator.jpg'
 // 引入action
 import {setUser, setSocket, setTargetInfo} from '../store/action'
 import Friends from './friends'
@@ -193,7 +194,7 @@ class Home extends Component{
                 <Header className='home-header'>
                     <div className='home-header-user'>
                         <div className='home-header-user-avator'>
-                            <Avatar shape='square' size={30}  src='../img/avator.jpg' />
+                            <Avatar shape='square' size={30}  src={avator} />
                         </div>
                         <div className='home-header-user-menu'>
                             <Dropdown overlay={hearderMenu} trigger={['click']}>

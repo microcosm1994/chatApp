@@ -232,7 +232,7 @@ class friends extends Component{
                         </div>
                         <div className='friends-bigWindow-info-container'>
                             <div className='friends-bigWindow-info-container-avator'>
-                                <Avatar shape='square' size={30}  src='../img/avator.jpg' />
+                                <Avatar shape='square' size={30}  src={avator} />
                             </div>
                             <div className='friends-bigWindow-info-container-name'>
                                 小宇宙
