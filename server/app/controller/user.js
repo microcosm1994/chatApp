@@ -23,9 +23,6 @@ class User extends Controller {
         // 过期时间
         let time = 3600 * 24 * 30
         let {username, password} = ctx.request.body
-        // 获取域名
-        let referer = ctx.request.header.referer
-        let domin = referer.slice(referer.indexOf('//') + 2, referer.indexOf(':3000'))
         // 加密密码
         password = await ctx.service.utils.sha256(password, username)
         // 查询用户
@@ -37,13 +34,15 @@ class User extends Controller {
                 ctx.cookies.set('t', token,{
                     maxAge: time * 1000,
                     path: '/',
-                    domain: domin,
+                    // domain: 'www.dubo.world',
+                    domain: 'localhost',
                     httpOnly: false,
                 });
                 ctx.cookies.set('uid', data.id,{
                     maxAge: time * 1000,
                     path: '/',
-                    domain: domin,
+                    // domain: 'www.dubo.world',
+                    domain: 'localhost',
                     httpOnly: false,
                 });
                 // 保存token到redis

@@ -37,12 +37,15 @@ class chatVideos extends Component {
             audio: true,
             video: true
         }
+        console.log(1);
         navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
             /* 使用这个stream stream */
             bvideo.src = window.URL.createObjectURL(stream)
             // 保存视频流
+            console.log(stream);
             this.setState({localStream: stream})
         }).catch(function (err) {
+            console.log(err);
             /* 处理error */
         })
     }
@@ -50,6 +53,8 @@ class chatVideos extends Component {
     // 创建视频连接实例
     createPeerConnection() {
         let stream = this.state.localStream
+        console.log('createPeerConnectionv');
+        console.log(stream);
         if (stream) {
             sendPc = new RTCPeerConnection()
             recvPc = new RTCPeerConnection()
@@ -121,10 +126,8 @@ class chatVideos extends Component {
 
     // 等待ICE
     onIce(socket) {
-        console.log('onIce');
         // 监听socket消息，获取Answer
         if (recvPc && sendPc) {
-            console.log(1);
             socket.on('CHATVIDEO_ICE', res => {
                 if (res.status === 200) {
                     if (res.data.type === 'send') {

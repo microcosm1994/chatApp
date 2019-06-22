@@ -34,7 +34,7 @@ class Home extends Component{
     }
     componentDidMount () {
         // 创建socket连接
-        const socket = io('ws://localhost:7001', {
+        const socket = io('https://www.dubo.world:7001', {
             reconnectionAttempts: 10,
             query: {
                 uid: this.state.user.uid
