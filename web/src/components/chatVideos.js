@@ -37,12 +37,29 @@ class chatVideos extends Component {
             audio: true,
             video: true
         }
-        console.log(1);
+        if (navigator.mediaDevices === undefined) {
+            navigator.mediaDevices = {};
+        }
+        if (navigator.mediaDevices.getUserMedia === undefined) {
+            navigator.mediaDevices.getUserMedia = function(constraints) {
+                // 首先，如果有getUserMedia的话，就获得它
+                let getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+
+                // 一些浏览器根本没实现它 - 那么就返回一个error到promise的reject来保持一个统一的接口
+                if (!getUserMedia) {
+                    return Promise.reject(new Error('getUserMedia is not implemented in this browser'));
+                }
+
+                // 否则，为老的navigator.getUserMedia方法包裹一个Promise
+                return new Promise(function(resolve, reject) {
+                    getUserMedia.call(navigator, constraints, resolve, reject);
+                });
+            }
+        }
         navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
             /* 使用这个stream stream */
-            bvideo.src = window.URL.createObjectURL(stream)
+            bvideo.srcObject = stream
             // 保存视频流
-            console.log(stream);
             this.setState({localStream: stream})
         }).catch(function (err) {
             console.log(err);
@@ -53,11 +70,12 @@ class chatVideos extends Component {
     // 创建视频连接实例
     createPeerConnection() {
         let stream = this.state.localStream
-        console.log('createPeerConnectionv');
-        console.log(stream);
         if (stream) {
-            sendPc = new RTCPeerConnection()
-            recvPc = new RTCPeerConnection()
+            let PeerConnection = window.RTCPeerConnection ||
+                window.mozRTCPeerConnection ||
+                window.webkitRTCPeerConnection
+            sendPc = new PeerConnection()
+            recvPc = new PeerConnection()
             stream.getTracks().forEach(item => {
                 sendPc.addTrack(item, stream)
             })
@@ -127,6 +145,8 @@ class chatVideos extends Component {
     // 等待ICE
     onIce(socket) {
         // 监听socket消息，获取Answer
+        console.log(recvPc);
+        console.log(sendPc);
         if (recvPc && sendPc) {
             socket.on('CHATVIDEO_ICE', res => {
                 if (res.status === 200) {

@@ -21,11 +21,11 @@ class file extends Controller{
                 let file = {}
                 file.name = part.filename
                 file.type = part.mimeType
-                let filePath = path.join('E:/myproject/chatApp/server/app/public/upload', part.filename)
+                let filePath = path.join('/home/web/public/upload', part.filename)
                 let writable = fs.createWriteStream(filePath)// 创建写入流
                 await part.pipe(writable)
-                file.cover = fileIcon(part.mimeType, 'http://localhost:7001/public/upload/' + part.filename)
-                file.path = 'http://localhost:7001/public/upload/' + part.filename
+                file.cover = fileIcon(part.mimeType, 'https://www.dubo.world/public/upload/' + part.filename)
+                file.path = 'https://www.dubo.world/public/upload/' + part.filename
                 result.push(file)
             }
         }

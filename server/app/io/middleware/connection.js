@@ -12,6 +12,7 @@ module.exports = app => {
             socket.uid = query.uid
             app.usocket.setState(query.uid, socket)
         }
+        console.log(query);
         await next();
         // 断开连接时执行.
         app.usocket.removeState(query.uid)
