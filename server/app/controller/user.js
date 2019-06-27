@@ -63,8 +63,18 @@ class User extends Controller {
     // 退出登陆
     async logout () {
         const {ctx} = this
-        await ctx.cookies.set('uid', null)
-        await ctx.cookies.set('t', null)
+        await ctx.cookies.set('uid', null, {
+            path: '/',
+            domain: 'www.dubo.world',
+            // domain: 'localhost',
+            httpOnly: false,
+        })
+        await ctx.cookies.set('t', null, {
+            path: '/',
+            domain: 'www.dubo.world',
+            // domain: 'localhost',
+            httpOnly: false,
+        })
         ctx.status = 200
         ctx.body = {}
     }

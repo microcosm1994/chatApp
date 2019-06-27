@@ -35,10 +35,12 @@ $axios.interceptors.response.use(
                 // 身份验证不通过
                 case 401:
                     message.error(m)
+                    window.location.href = 'https://www.dubo.world/login'
                     break
                 // 拒绝请求
                 case 403:
                     message.error(m)
+                    window.location.href = 'https://www.dubo.world/login'
                     break
                 default:
                     break
