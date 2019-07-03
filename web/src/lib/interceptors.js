@@ -1,5 +1,6 @@
 // 接口请求拦截
 import axios from 'axios'
+import config from './config'
 import {message} from 'antd'
 
 export const $axios = axios.create()
@@ -35,12 +36,12 @@ $axios.interceptors.response.use(
                 // 身份验证不通过
                 case 401:
                     message.error(m)
-                    window.location.href = 'https://www.dubo.world/login'
+                    window.location.href = config.domain + '/login'
                     break
                 // 拒绝请求
                 case 403:
                     message.error(m)
-                    window.location.href = 'https://www.dubo.world/login'
+                    window.location.href = config.domain + '/login'
                     break
                 default:
                     break

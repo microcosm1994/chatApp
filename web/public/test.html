@@ -19,16 +19,30 @@
         console.log(document.getElementById('btn'));
 
     }
+    let person = {}
+    person.name = 'dubo'
+    function definPro (obj, key, val) {
+        Object.defineProperty(obj, key, {
+            enumerable: true,
+            configurable: true,
+            get: function () {
+                console.log('监听get')
+                return val
+            },
+            set: function (value) {
+                console.log('监听set')
+                console.log(value);
+                val = value
+            }
+        })
+    }
+    definPro(person, 'name', person['name'])
     document.getElementById('btn').addEventListener('click', function (e) {
-        console.log(e);
-        let input = document.getElementById('input')
-        let svg = document.getElementById('svg')
-        let span = document.getElementById('span')
-        console.log(input);
-        console.log(span);
-        input.appendChild(svg)
-        input.appendChild(span)
+        console.log(person.name);
+        person.name = 'ek'
+        console.log(person.name);
     })
+
 </script>
 </body>
 </html>

@@ -37,10 +37,10 @@
   },
   "proxy": {
     "/api": {
-      "target": "http://68.168.128.247/",
+      "target": "http://localhost:7001",
       "changeOrigin": true,
       "pathRewrite": {
-        "^/api": "/api"
+        "^/api": ""
       }
     }
   }

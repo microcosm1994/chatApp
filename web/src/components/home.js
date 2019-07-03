@@ -11,6 +11,7 @@ import avator from '../img/avator.jpg'
 import {setUser, setSocket, setTargetInfo} from '../store/action'
 import Friends from './friends'
 import ChatWindow from "./chatWindow";
+import config from '../lib/config'
 import '../css/home.css'
 
 const { Header, Sider, Content } = Layout
@@ -33,8 +34,9 @@ class Home extends Component{
         setUser(this.state.user)
     }
     componentDidMount () {
+        console.log(this.state.user);
         // 创建socket连接
-        const socket = io('wss://www.dubo.world', {
+        const socket = io(config.socketDomain, {
             reconnectionAttempts: 10,
             query: {
                 uid: this.state.user.uid
