@@ -1,5 +1,5 @@
 import React, {Component} from 'react'
-import {Form, Icon, Input, Button, Checkbox} from 'antd'
+import {Form, Icon, Input, Button, message} from 'antd'
 import {$axios} from "../lib/interceptors";
 import cookie from 'react-cookies'
 import title from '../img/title.png'
@@ -29,13 +29,13 @@ class Login extends Component{
                 let ip = this.state.ip.replace(/(\.)/g, '')
                 form.username = ip
                 form.password = ip
-                console.log(form);
-                return false
-                $axios.post('/api/user/login', form).then((res) => {
+                form.nickname = values.nickname
+                $axios.post('/api/user/register', form).then((res) => {
                     if (res.status === 200) {
                         // 保存用户信息到cookie
                         cookie.save('nickname', res.data.nickname)
-                        // this.props.history.push('/')
+                    } else {
+                        this.login({username: form.username, password: form.password})
                     }
                 })
             } else {
@@ -43,9 +43,14 @@ class Login extends Component{
             }
         });
     }
-    register = e => {
-        console.log(this.props);
-        this.props.history.push('/login/register')
+    login = (form) => {
+        $axios.post('/api/user/login', form).then((res) => {
+            if (res.status === 200) {
+                // 保存用户信息到cookie
+                cookie.save('nickname', res.data.nickname)
+                this.props.history.push('/')
+            }
+        })
     }
     render () {
         const { getFieldDecorator } = this.props.form;
