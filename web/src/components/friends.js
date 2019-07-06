@@ -16,6 +16,7 @@ class friends extends Component{
             uid: props.uid,
             unreadChat: false,
             friendsList: [], // 好友列表
+            userAllList: [], // 全部用户列表
             searchFriendsList: [], // 搜索好友列表
             friendsMsgList: [], // 好友消息列表
             notifyList: [], // 通知列表
@@ -27,24 +28,30 @@ class friends extends Component{
     }
     // 切换好友、聊天组tab栏
     tabHandler (key) {
-        if (key === '1' || key === '1-1') {
-            this.getFriends()
-            this.setState({unreadChat: false})
-        }
-        if (key === '1-2') {
-            console.log('群组');
-        }
-        if (key === '2' || key === '2-1') {
-            this.getFriendsMsg()
-        }
-        if (key === '2-2') {
-            console.log('通知');
+        switch (key) {
+            case '1' || '1-1':
+                this.getFriends()
+                this.setState({unreadChat: false})
+                break
+            case '1-2':
+                console.log('群组')
+                break
+            case '1-3':
+                this.getUserAll()
+                break
+            case '2' || '2-1':
+                this.getFriendsMsg()
+                break
+            case '2-2':
+                console.log('通知')
+                break
         }
     }
     // 获取好友列表
     getFriends () {
         let form = {
-            uid: this.props.user.uid
+            uid: this.props.user.uid,
+            delete: 0
         }
         $axios.post('/api/friends/get', form).then((res) => {
             if (res.status === 200) {
@@ -56,6 +63,21 @@ class friends extends Component{
                 }
                 this.getUnread(idArr)
                 this.setState({friendsList: res.data})
+            }
+        })
+    }
+    // 获取全部用户列表
+    getUserAll () {
+        $axios.post('/api/user/getAll').then((res) => {
+            if (res.status === 200) {
+                let idArr = []
+                for (let i = 0; i < res.data.length; i++) {
+                    if (!idArr.includes(res.data[i].id)) {
+                        idArr.push(res.data[i].id)
+                    }
+                }
+                this.getUnread(idArr)
+                this.setState({userAllList: res.data})
             }
         })
     }
@@ -260,6 +282,23 @@ class friends extends Component{
                                     </TabPane>
                                     <TabPane tab="聊天组" key="1-2">
                                         Content of Tab Pane 2
+                                    </TabPane>
+                                    <TabPane tab={<Badge dot={this.state.unreadChat}>全部用户</Badge>} key="1-3">
+                                        <List
+                                            itemLayout="horizontal"
+                                            dataSource={this.state.userAllList}
+                                            renderItem={item => (
+                                                <List.Item actions={[
+                                                    <ListBtn click={this.openChatWindow.bind(this, item, 1)} text='聊天' self={this} data={item} />,
+                                                    <ListBtn click={this.addFriends.bind(this, item.id, 1)} text='加好友' self={this} data={item} />]}>
+                                                    <List.Item.Meta
+                                                        avatar={<Badge count={item.unread}><Avatar src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" /></Badge>}
+                                                        title={<a href="https://ant.design">{item.nickname}</a>}
+                                                        description=""
+                                                    />
+                                                </List.Item>
+                                            )}
+                                        />
                                     </TabPane>
                                 </Tabs>
                             </TabPane>

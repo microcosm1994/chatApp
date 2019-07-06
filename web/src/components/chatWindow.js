@@ -130,7 +130,10 @@ class chatWindow extends Component {
         const {socket, user, targetInfo} = this.props
         let value = this.refs.chatWindowReply.innerHTML
         // 获取消息数据的id
-        let msgId = this.state.msgContent[this.state.msgContent.length - 1].id + 1
+        let msgId = 1
+        if (this.state.msgContent.length) {
+            msgId = this.state.msgContent[this.state.msgContent.length - 1].id + 1
+        }
         if (value) {
             // 字符串转dom对象，方便后续操作
             let parser = new DOMParser()
@@ -235,6 +238,7 @@ class chatWindow extends Component {
         let lastId = null
         switch (type) {
             case '[object Array]':
+                if (!data.length) break
                 this.state.msgContent = [...data, ...this.state.msgContent]
                 lastId = data[data.length - 1].id
                 break

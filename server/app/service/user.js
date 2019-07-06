@@ -19,7 +19,7 @@ class user extends Service {
         return user
     }
     // 模糊查询
-    async findAll (obj) {
+    async findVague (obj) {
         const {app, ctx} = this;
         const {Op} = app.Sequelize
         let uid = ctx.cookies.get('uid')
@@ -29,6 +29,21 @@ class user extends Service {
                     { username: {[Op.like]: '%' + obj.username + '%'}},
                     { nickname: {[Op.like]: '%' + obj.nickname + '%'}}
                 ],
+                id: {
+                    [Op.not]: uid,
+                }
+            }
+        })
+        return user
+    }
+    // 模糊查询
+    async findAll () {
+        const {app, ctx} = this;
+        const {Op} = app.Sequelize
+        let uid = ctx.cookies.get('uid')
+        const user = await ctx.model.User.findAll({
+            where: {
+                delete: 0,
                 id: {
                     [Op.not]: uid,
                 }

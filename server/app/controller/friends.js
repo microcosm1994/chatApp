@@ -41,7 +41,7 @@ class friends extends Controller{
                                if (result[k].userid === data1[k1].id || result[k].targetid === data1[k1].id) {
                                    // 好友信息
                                    result[k]['targetInfo'] = data1[k1]
-                                   result[k]['isSocket'] = socketUser[data1[k1].id] ? true : false
+                                   result[k]['dataValues']['isSocket'] = socketUser[data1[k1].id] ? true : false
                                    // 从返回结果中删除userid和targetid
                                    delete result[k].userid
                                    delete result[k].targetid
