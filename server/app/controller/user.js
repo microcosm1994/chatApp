@@ -13,15 +13,15 @@ class User extends Controller {
                 ctx.cookies.set('t', token,{
                     maxAge: time * 1000,
                     path: '/',
-                    domain: 'www.dubo.world',
-                    // domain: 'localhost',
+                    // domain: 'www.dubo.world',
+                    domain: 'localhost',
                     httpOnly: false,
                 });
                 ctx.cookies.set('uid', data.id,{
                     maxAge: time * 1000,
                     path: '/',
-                    domain: 'www.dubo.world',
-                    // domain: 'localhost',
+                    // domain: 'www.dubo.world',
+                    domain: 'localhost',
                     httpOnly: false,
                 });
                 // 保存token到redis
@@ -55,15 +55,15 @@ class User extends Controller {
                 ctx.cookies.set('t', token,{
                     maxAge: time * 1000,
                     path: '/',
-                    domain: 'www.dubo.world',
-                    // domain: 'localhost',
+                    // domain: 'www.dubo.world',
+                    domain: 'localhost',
                     httpOnly: false,
                 });
                 ctx.cookies.set('uid', data.id,{
                     maxAge: time * 1000,
                     path: '/',
-                    domain: 'www.dubo.world',
-                    // domain: 'localhost',
+                    // domain: 'www.dubo.world',
+                    domain: 'localhost',
                     httpOnly: false,
                 });
                 // 保存token到redis

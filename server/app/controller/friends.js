@@ -17,7 +17,7 @@ class friends extends Controller{
         })
     }
     async get () {
-        let {ctx} = this
+        let {app, ctx} = this
         let form = ctx.request.body
         let result = null
         await ctx.service.friends.find(form).then(async (data) => {
@@ -34,12 +34,14 @@ class friends extends Controller{
                 if (idArr.length > 0) {
                     // 按id数组查询用户（好友）信息
                     await ctx.service.user.findidArr(idArr).then(data1 => {
+                        let socketUser = app.usocket.getState()
                         for (let k = 0; k < result.length; k++) {
                            for (let k1 = 0; k1 < data1.length; k1++) {
                                // 如果俩个数据的id一样，就把用户数据添加到好友数据中
                                if (result[k].userid === data1[k1].id || result[k].targetid === data1[k1].id) {
                                    // 好友信息
                                    result[k]['targetInfo'] = data1[k1]
+                                   result[k]['isSocket'] = socketUser[data1[k1].id] ? true : false
                                    // 从返回结果中删除userid和targetid
                                    delete result[k].userid
                                    delete result[k].targetid

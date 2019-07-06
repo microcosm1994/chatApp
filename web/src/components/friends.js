@@ -22,7 +22,6 @@ class friends extends Component{
         }
     }
     componentDidMount () {
-        console.log(avator);
         this.getFriends()
         this.props.onRef('friends', this)
     }
@@ -216,7 +215,7 @@ class friends extends Component{
                             <Avatar size="small" src={avator} />
                         </div>
                         <div className='friends-smallWindow-info-name'>
-                            小宇宙
+                            {this.props.user.nickname}
                         </div>
                     </div>
                     <div className='friends-smallWindow-fullscreen' onClick={this.smallFullscreen.bind(this)}>
@@ -235,7 +234,7 @@ class friends extends Component{
                                 <Avatar shape='square' size={30}  src={avator} />
                             </div>
                             <div className='friends-bigWindow-info-container-name'>
-                                小宇宙
+                                {this.props.user.nickname}
                             </div>
                         </div>
                     </div>

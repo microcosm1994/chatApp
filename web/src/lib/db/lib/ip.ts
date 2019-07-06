@@ -1,7 +1,7 @@
 export default {
     IP: '',
     getlocalIP: async function () {
-        let ip
+        let ip:string
         let PeerConnection = window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection
         let peer = new PeerConnection({
             iceServers: []

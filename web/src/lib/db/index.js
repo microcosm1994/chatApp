@@ -1,6 +1,5 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var ip_1 = require("./lib/ip");
-var db = {};
-db = Object.assign(db, ip_1.default);
-exports.default = db;
+import ip from './lib/ip';
+import cookie from './lib/cookie';
+export { cookie, // cookie操作
+ip // ip相关的操作
+ };

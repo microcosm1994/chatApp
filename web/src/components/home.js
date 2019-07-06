@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import {Layout, Menu, Icon, Avatar, Dropdown, message, Modal } from 'antd'
 import { Switch } from 'react-router-dom'
 import { renderRoutes } from 'react-router-config'
-import cookie from 'react-cookies'
+import {cookie} from '../lib/db/index'
 import io from 'socket.io-client'
 import {$axios} from "../lib/interceptors";
 import {connect} from 'react-redux'
@@ -26,15 +26,21 @@ class Home extends Component{
             route: props.route.routes,
             isrender: false,
             user: {
-                nickname: cookie.load('nickname'),
-                uid: cookie.load('uid'),
-                token: cookie.load('t')
+                nickname: cookie.get('nickname'),
+                uid: cookie.get('uid'),
+                token: cookie.get('t')
             }
         }
         setUser(this.state.user)
     }
     componentDidMount () {
-        console.log(this.state.user);
+        this.setState({
+            user: {
+                nickname: cookie.get('nickname'),
+                uid: cookie.get('uid'),
+                token: cookie.get('t')
+            }
+        })
         // 创建socket连接
         const socket = io(config.socketDomain, {
             reconnectionAttempts: 10,
@@ -172,7 +178,7 @@ class Home extends Component{
             case 0:
                 $axios.post('/api/user/logout').then((res) => {
                     if (res.status === 200) {
-                        cookie.remove('nickname')
+                        cookie.set('nickname', '')
                         this.props.history.push(pathArr[index])
                     }
                 })

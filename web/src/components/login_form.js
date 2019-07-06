@@ -1,9 +1,8 @@
 import React, {Component} from 'react'
 import {Form, Icon, Input, Button, message} from 'antd'
 import {$axios} from "../lib/interceptors";
-import cookie from 'react-cookies'
 import title from '../img/title.png'
-import db from '../lib/db/index'
+import {ip, cookie} from '../lib/db/index'
 import '../css/login.css'
 
 class Login extends Component{
@@ -15,7 +14,7 @@ class Login extends Component{
     }
     componentDidMount () {
         // 获取ip
-        db.getlocalIP().then(res => {
+        ip.getlocalIP().then(res => {
             this.setState({
                 ip: res
             })
@@ -33,7 +32,7 @@ class Login extends Component{
                 $axios.post('/api/user/register', form).then((res) => {
                     if (res.status === 200) {
                         // 保存用户信息到cookie
-                        cookie.save('nickname', res.data.nickname)
+                        cookie.set('nickname', res.data.nickname)
                     } else {
                         this.login({username: form.username, password: form.password})
                     }
@@ -46,8 +45,9 @@ class Login extends Component{
     login = (form) => {
         $axios.post('/api/user/login', form).then((res) => {
             if (res.status === 200) {
+                message.info('您已经拥有账号"' + res.data.nickname + '"')
                 // 保存用户信息到cookie
-                cookie.save('nickname', res.data.nickname)
+                cookie.set('nickname', res.data.nickname)
                 this.props.history.push('/')
             }
         })

@@ -1,5 +1,7 @@
 import ip from './lib/ip'
-let db = {}
-db = Object.assign(db, ip)
-export default db
+import cookie from './lib/cookie'
 
+export {
+    cookie, // cookie操作
+    ip // ip相关的操作
+}
