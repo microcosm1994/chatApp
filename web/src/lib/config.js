@@ -1,4 +1,4 @@
 export default {
-    domain: 'http://localhost:3000',
-    socketDomain: 'ws://localhost:7001'
+    domain: 'https://www.dubo.world',
+    socketDomain: 'wss://www.dubo.world'
 }

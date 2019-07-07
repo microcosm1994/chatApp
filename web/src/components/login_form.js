@@ -14,9 +14,9 @@ class Login extends Component{
     }
     componentDidMount () {
         // 获取ip
-        ip.getlocalIP().then(res => {
+        ip.getIP((ip) => {
             this.setState({
-                ip: res
+                ip: ip
             })
         })
     }
@@ -33,6 +33,7 @@ class Login extends Component{
                     if (res.status === 200) {
                         // 保存用户信息到cookie
                         cookie.set('nickname', res.data.nickname)
+                        this.props.history.push('/')
                     } else {
                         this.login({username: form.username, password: form.password})
                     }

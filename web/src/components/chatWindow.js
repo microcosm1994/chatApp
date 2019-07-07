@@ -50,6 +50,7 @@ class chatWindow extends Component {
     // 获取聊天数据
     get(props, offset, limit) {
         const {user, targetInfo} = props
+        console.log(user);
         if (user.uid && targetInfo.id) {
             let form = {}
             form.userid = user.uid
